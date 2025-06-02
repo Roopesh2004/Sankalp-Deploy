@@ -16,7 +16,7 @@ export const AdminDashboard: React.FC = () => {
   useEffect(() => {
     const fetchPendingRegistrations = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/admin-check');
+        const response = await fetch('https://sankalp-deploy-1.onrender.com/api/admin-check');
         if (!response.ok) throw new Error('Failed to fetch pending registrations');
         
         const result = await response.json();
@@ -55,7 +55,7 @@ export const AdminDashboard: React.FC = () => {
     );
     
     try {
-      const response = await fetch('http://localhost:5000/api/admin-approve', {
+      const response = await fetch('https://sankalp-deploy-1.onrender.com/api/admin-approve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ value: 1, email }),

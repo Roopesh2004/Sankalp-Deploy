@@ -215,7 +215,7 @@ export const StudentDashboard: React.FC = () => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/courses');
+        const response = await fetch('https://sankalp-deploy-1.onrender.com/api/courses');
         if (!response.ok) throw new Error('Failed to fetch courses');
         const data = await response.json();
         setCourses(data);
@@ -234,13 +234,13 @@ export const StudentDashboard: React.FC = () => {
     if (selectedCourse) {
       const fetchCourseModules = async () => {
         try {
-          const response = await fetch(`http://localhost:5000/api/course-modules/${selectedCourse}`);
+          const response = await fetch(`https://sankalp-deploy-1.onrender.com/api/course-modules/${selectedCourse}`);
           if (!response.ok) throw new Error('Failed to fetch course modules');
           const data = await response.json();
           setCourseModules(data);
           
           // Fetch materials for all modules in this course
-          const materialsResponse = await fetch(`http://localhost:5000/api/module-materials/${selectedCourse}`);
+          const materialsResponse = await fetch(`https://sankalp-deploy-1.onrender.com/api/module-materials/${selectedCourse}`);
           if (!materialsResponse.ok) throw new Error('Failed to fetch module materials');
           const materialsData = await materialsResponse.json();
           setModulesMaterials(materialsData);

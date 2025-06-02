@@ -20,7 +20,7 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackTo
     setError(null);
     
     try {
-      const response = await fetch('http://localhost:5000/api/forgot-password', {
+      const response = await fetch('https://sankalp-deploy-1.onrender.com/api/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -46,7 +46,7 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackTo
     setError(null);
     
     try {
-      const response = await fetch('http://localhost:5000/api/verify-otp', {
+      const response = await fetch('https://sankalp-deploy-1.onrender.com/api/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp }),
@@ -78,7 +78,7 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackTo
     }
     
     try {
-      const response = await fetch('http://localhost:5000/api/reset-password', {
+      const response = await fetch('https://sankalp-deploy-1.onrender.com/api/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp, password }),

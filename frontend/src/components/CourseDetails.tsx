@@ -50,7 +50,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
     
     setIsLoadingVideo(true);
     try {
-      const response = await fetch('http://localhost:5000/api/generate-video-token', {
+      const response = await fetch('https://sankalp-deploy-1.onrender.com/api/generate-video-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, moduleId }),
@@ -79,7 +79,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
       const token = await getVideoToken(moduleId);
       if (token) {
         // Open the secure video player in a new tab
-        window.open(`http://localhost:5000/api/secure-video/${moduleId}?token=${token}`, '_blank');
+        window.open(`https://sankalp-deploy-1.onrender.com/api/secure-video/${moduleId}?token=${token}`, '_blank');
       } else {
         console.error('Failed to get video token');
       }
@@ -97,7 +97,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
       
       try {
         // Check pending status
-        const pendingResponse = await fetch('http://localhost:5000/api/pending-check', {
+        const pendingResponse = await fetch('https://sankalp-deploy-1.onrender.com/api/pending-check', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, courseId: course.id }),
@@ -114,7 +114,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
         }
         
         // If not in pending, check if already has access
-        const accessResponse = await fetch('http://localhost:5000/api/check-course-access', {
+        const accessResponse = await fetch('https://sankalp-deploy-1.onrender.com/api/check-course-access', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, courseId: course.id }),
@@ -147,7 +147,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
     setErrorMessage('');
     
     try {
-      const response = await fetch('http://localhost:5000/api/pending', {
+      const response = await fetch('https://sankalp-deploy-1.onrender.com/api/pending', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

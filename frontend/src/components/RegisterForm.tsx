@@ -29,7 +29,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onLoginClick }) => {
     
     try {
       // Send data to backend API
-      const response = await fetch('http://localhost:5000/api/register', {
+      const response = await fetch('https://sankalp-deploy-1.onrender.com/api/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -59,7 +59,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onLoginClick }) => {
     setError('');
     
     try {
-      const response = await fetch('http://localhost:5000/api/verify-registration', {
+      const response = await fetch('https://sankalp-deploy-1.onrender.com/api/verify-registration', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
