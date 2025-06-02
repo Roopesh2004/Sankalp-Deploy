@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-black text-gray-100;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-dark-200 rounded-lg shadow-xl border border-primary-800/20 backdrop-blur-sm;
+  }
+
+  .input {
+    @apply bg-dark-100 border-primary-800 text-gray-100 focus:border-primary-500 focus:ring-primary-500;
+  }
+
+  .btn-primary {
+    @apply bg-primary-600 hover:bg-primary-700 text-white transition-colors duration-200;
+  }
+
+  .btn-secondary {
+    @apply bg-dark-100 hover:bg-dark-200 text-gray-100 border border-primary-800/30 transition-colors duration-200;
+  }
+  
+  .section-bg {
+    @apply bg-black relative overflow-hidden;
+  }
+}
+
+@layer utilities {
+  @media (prefers-reduced-motion: reduce) {
+    .animate-safe {
+      animation: none !important;
+      transform: none !important;
+    }
+  }
+  
+  /* Mobile-specific animation optimizations */
+  @media (max-width: 768px) {
+    .animate-safe {
+      animation-duration: 50% !important;
+      transition-duration: 50% !important;
+    }
+    
+    .reduce-motion {
+      transform: none !important;
+      animation: none !important;
+    }
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .container {
+    @apply px-4;
+  }
+  
+  .card {
+    @apply p-4;
+  }
+  
+  /* Reduce motion on mobile */
+  @media (prefers-reduced-motion: no-preference) {
+    .animate-float {
+      animation: none;
+    }
+    
+    .hover-scale:hover {
+      transform: none;
+    }
+  }
+}
+
+/* Add touch feedback */
+@media (hover: none) {
+  .btn-primary:active,
+  .btn-secondary:active {
+    transform: scale(0.98);
+  }
+}

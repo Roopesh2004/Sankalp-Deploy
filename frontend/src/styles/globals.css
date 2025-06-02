@@ -1,0 +1,27 @@
+/* Animation for form elements */
+@keyframes slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Ensure button groups are visible */
+.button-group {
+  display: flex;
+  opacity: 1;
+}
+
+/* Arrow animation for buttons */
+.arrow-animation {
+  display: inline-flex;
+  transition: transform 0.3s ease;
+}
+
+button:hover .arrow-animation {
+  transform: translateX(5px);
+}
