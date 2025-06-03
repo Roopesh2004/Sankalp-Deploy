@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Zap, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, ArrowRight } from 'lucide-react';
+import { Zap, Mail, Phone, MapPin, Instagram, Linkedin, ArrowRight, Youtube } from 'lucide-react';
 import * as THREE from 'three';
 
 const Footer = () => {
@@ -152,10 +152,12 @@ const Footer = () => {
     }
   };
 
-  const SocialIcon = ({ icon }: { icon: React.ReactNode }) => {
+  const SocialIcon = ({ icon, href }: { icon: React.ReactNode; href: string }) => {
     return (
       <motion.a
-        href="#"
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
         className="bg-dark-300 p-2 rounded-full hover:bg-primary-600 transition-colors relative overflow-hidden group"
         variants={iconAnimation}
         whileHover={{ 
@@ -258,7 +260,7 @@ const Footer = () => {
                     repeat: Infinity,
                     repeatType: "reverse"
                   }}
-                >2.0</motion.span>
+                ></motion.span>
               </motion.span>
             </motion.div>
             
@@ -273,10 +275,18 @@ const Footer = () => {
               className="flex space-x-4"
               variants={containerAnimation}
             >
-              <SocialIcon icon={<Facebook size={18} />} />
-              <SocialIcon icon={<Twitter size={18} />} />
-              <SocialIcon icon={<Instagram size={18} />} />
-              <SocialIcon icon={<Linkedin size={18} />} />
+              <SocialIcon 
+                icon={<Linkedin size={18} />} 
+                href="https://www.linkedin.com/company/spectovx/" 
+              />
+              <SocialIcon 
+                icon={<Youtube size={18} />} 
+                href="https://youtube.com/@spectov?si=KRfOPRG3oWokXg8Y" 
+              />
+              <SocialIcon 
+                icon={<Instagram size={18} />} 
+                href="https://www.instagram.com/spectov_official?igsh=MWJnODhjbm83ejV2dQ==" 
+              />
             </motion.div>
           </motion.div>
           
@@ -314,33 +324,7 @@ const Footer = () => {
                 textShadow: "0 0 8px rgba(124, 58, 237, 0.6)"
               }}
             >
-              Programs
-              <motion.span 
-                className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary-400"
-                initial={{ width: 0 }}
-                whileInView={{ width: "100%" }}
-                transition={{ duration: 0.8, delay: 0.7 }}
-              />
-            </motion.h3>
-            <motion.ul 
-              className="space-y-3"
-              variants={containerAnimation}
-            >
-              <FooterLink href="#undergraduate">Undergraduate Program</FooterLink>
-              <FooterLink href="#career">Career Transition</FooterLink>
-              <FooterLink href="#internship">Paid Internships</FooterLink>
-              <FooterLink href="#placement">Placement Assistance</FooterLink>
-              <FooterLink href="#mentorship">Mentorship</FooterLink>
-            </motion.ul>
-          </motion.div>
-          
-          <motion.div variants={itemAnimation}>
-            <motion.h3 
-              className="text-lg font-bold mb-6 relative inline-block"
-              whileHover={{
-                textShadow: "0 0 8px rgba(124, 58, 237, 0.6)"
-              }}
-            >
+              
               Contact Us
               <motion.span 
                 className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary-400"
@@ -434,7 +418,7 @@ const Footer = () => {
                   className="text-gray-400"
                   whileHover={{ color: "#A78BFA" }}
                 >
-                  SpectoV Headquarters, Ghaziabad Loni UP, Chennai, India
+                  SpectoV Headquarters, Ghaziabad Loni UP, Chennai, India
                 </motion.span>
               </motion.li>
             </motion.ul>

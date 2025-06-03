@@ -458,39 +458,7 @@ const ProgramCard = ({
           ))}
         </div>
         
-        <motion.button
-          className="w-full bg-dark-200 text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-dark-400 transition-colors border border-dark-400 relative overflow-hidden"
-          whileHover={{ scale: 1.03 }} // More scaling (was 1.02)
-          whileTap={{ scale: 0.97 }} // More scaling (was 0.98)
-        >
-          {/* Button hover effect - more visible sweep */}
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-primary-900/10 via-primary-700/20 to-primary-900/10" // More visible gradient
-            animate={{
-              x: ['-100%', '100%']
-            }}
-            transition={{
-              x: {
-                duration: 1.5,
-                repeat: Infinity,
-                repeatType: "loop"
-              }
-            }}
-          />
-          
-          <span className="relative z-10">Learn More</span> 
-          <motion.div
-            animate={{ x: [0, 5, 0] }}
-            transition={{
-              duration: 0.8,
-              repeat: Infinity,
-              repeatType: "reverse"
-            }}
-            className="relative z-10"
-          >
-            <ArrowRight size={16} />
-          </motion.div>
-        </motion.button>
+        
       </div>
       
       {/* Corner energy lines - more visible */}

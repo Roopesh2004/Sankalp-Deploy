@@ -339,59 +339,62 @@ const Hero = () => {
                 className="flex flex-col sm:flex-row gap-4"
                 variants={titleAnimation}
               >
-                <motion.button
+                
+                <motion.a
+                  href="/getstarted"
                   className="bg-primary-600 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full font-medium transition-colors flex items-center justify-center gap-2 relative overflow-hidden group"
                   whileHover={{ 
-                    scale: 1.05,
-                    boxShadow: "0 0 25px rgba(124, 58, 237, 0.5)"
+                  scale: 1.05,
+                  boxShadow: "0 0 25px rgba(124, 58, 237, 0.5)"
                   }}
                   whileTap={{ scale: 0.95 }}
                 >
                   <motion.span
-                    className="absolute inset-0 bg-white/30"
-                    initial={{ x: "-100%" }}
-                    whileHover={{ x: "100%" }}
-                    transition={{ duration: 0.5 }}
+                  className="absolute inset-0 bg-white/30"
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: "100%" }}
+                  transition={{ duration: 0.5 }}
                   />
                   Get Started 
                   <motion.span
-                    animate={{ x: [0, 5, 0] }}
-                    transition={{ duration: 1, repeat: Infinity }}
+                  animate={{ x: [0, 5, 0] }}
+                  transition={{ duration: 1, repeat: Infinity }}
                   >
-                    <ArrowRight size={18} />
+                  <ArrowRight size={18} />
                   </motion.span>
-                </motion.button>
-                
-                <motion.button
-                  className="border-2 border-dark-400 text-gray-300 px-6 md:px-8 py-2.5 md:py-3 rounded-full font-medium hover:border-primary-600 hover:text-primary-400 transition-colors relative overflow-hidden"
-                  whileHover={{ 
-                    scale: 1.05,
-                    boxShadow: "0 0 25px rgba(124, 58, 237, 0.2)"
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <motion.span
-                    className="absolute inset-0 bg-primary-600/10"
-                    initial={{ scale: 0 }}
-                    whileHover={{ scale: 1 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                  Learn More
-                </motion.button>
-              </motion.div>
-            </motion.div>
+                </motion.a>                
+               <motion.div
+  whileHover={{ scale: 1.05 }}
+  whileTap={{ scale: 0.95 }}
+>
+  <a 
+    href="#programs"
+    className="bg-white/20 text-white px-8 py-3 rounded-full font-medium hover:bg-white/30 transition-colors relative overflow-hidden group inline-block"
+  >
+    <motion.span
+      className="absolute inset-0 bg-primary-600/10"
+      initial={{ scale: 0 }}
+      whileHover={{ scale: 1 }}
+      transition={{ duration: 0.3 }}
+    />
+    <span className="relative z-10">Learn More</span>
+  </a>
+</motion.div>
+</motion.div>
+</motion.div>
 
-            <motion.div
-              className="relative hidden md:block"
-              initial="hidden"
-              animate="visible"
-              variants={cardAnimation}
-            >
-              <motion.div 
-                className="relative z-10"
-                whileHover={{ scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 200, damping: 25 }}
-              >
+<motion.div
+  className="relative hidden md:block"
+  initial="hidden"
+  animate="visible"
+  variants={cardAnimation}
+>
+  <motion.div 
+    className="relative z-10"
+    whileHover={{ scale: 1.02 }}
+    transition={{ type: "spring", stiffness: 200, damping: 25 }}
+  >
+
                 {/* Only render SphereAnimation if not on a low-performance device */}
                 {!isLowPerfDevice && <SphereAnimation/>}
                 

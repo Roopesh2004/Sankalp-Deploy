@@ -211,7 +211,7 @@ const Services = () => {
   ];
 
   return (
-    <section className="py-20 bg-black relative overflow-hidden">
+    <section id="services" className="py-20 bg-black relative overflow-hidden">
       {/* Three.js Background container */}
       <div ref={mountRef} className="absolute inset-0 z-0" style={{ pointerEvents: 'none' }} />
       
