@@ -408,14 +408,15 @@ const About = () => {
               variants={textAnimation}
               custom={0.7}
             >
-              <motion.button
+                <motion.button
                 className="relative bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium py-2.5 px-6 rounded-lg overflow-hidden group"
                 whileHover={{ 
                   scale: 1.05,
                   boxShadow: "0 0 20px rgba(124, 58, 237, 0.5)"
                 }}
                 whileTap={{ scale: 0.98 }}
-              >
+                onClick={() => window.location.href = '/getstarted'}
+                >
                 <motion.span className="relative z-10">Join Our Team</motion.span>
                 
                 {/* Gradient shift on hover */}
@@ -432,10 +433,10 @@ const About = () => {
                   whileHover={{ x: "100%" }}
                   transition={{ type: "tween", ease: "easeInOut", duration: 1 }}
                   style={{
-                    background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)"
+                  background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)"
                   }}
                 />
-              </motion.button>
+                </motion.button>
             </motion.div>
           </motion.div>
         </div>

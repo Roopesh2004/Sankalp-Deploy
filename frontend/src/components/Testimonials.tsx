@@ -14,24 +14,45 @@ import * as THREE from 'three';
 // Testimonials Data
 const testimonials = [
   {
-    name: "Priya Sharma",
-    role: "Software Engineer at Google",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80",
-    content: "The training program at SpectoV completely transformed my career. The mentorship and hands-on projects helped me land my dream job at Google.",
+    name: "Sachin",
+    role: "Student",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80",
+    content: "The training program was a fantastic initiative to empower learning and inspire innovation among tech enthusiasts. The content was highly valuable, and the overall experience was enriching.",
     rating: 5
   },
   {
-    name: "Rahul Verma",
-    role: "Full Stack Developer at Microsoft",
+    name: "Akshat",
+    role: "Student",
+    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80",
+    content: "The Sankalp Training Program by Specto V offered a strong foundation in AI/ML, combining theory and hands-on learning with knowledgeable instructors and excellent resources.",
+    rating: 5
+  },
+  {
+    name: "Sneh",
+    role: "Student",
+    image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80",
+    content: "The Sankalp Training Program offers valuable skills and opportunities, effectively bridging the gap between education and employability and can help a lot of individuals.",
+    rating: 5
+  },
+  {
+    name: "Anieruth",
+    role: "Student",
+    image: "https://images.unsplash.com/photo-1507591064344-4c6ce005b128?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80",
+    content: "Through the Sankalp Training Program, I gained hands-on experience in AR/VR using tools like Blender, building 3D modeling skills and expanding my knowledge in this innovative field.",
+    rating: 5
+  },
+  {
+    name: "Daksh",
+    role: "Student",
+    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80",
+    content: "The Sankalp Training Program offers crucial skills and opportunities, and equips individuals with essential skills, enhancing employability.",
+    rating: 5
+  },
+  {
+    name: "Mohnish",
+    role: "Student",
     image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80",
-    content: "The practical approach to learning and industry-focused curriculum made all the difference. I'm now working at Microsoft, thanks to SpectoV!",
-    rating: 5
-  },
-  {
-    name: "Aisha Patel",
-    role: "Frontend Developer at Amazon",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80",
-    content: "The mentors at SpectoV are exceptional. Their guidance and support helped me transition from a non-tech background to a developer role at Amazon.",
+    content: "The Sankalp program provided well-structured training with strong instructor support, enhancing my web development skills through real-world examples and hands-on tasks.",
     rating: 5
   }
 ];
@@ -197,7 +218,7 @@ const Testimonials = () => {
             Success Stories
           </h2>
           <p className="text-lg text-gray-300 max-w-2xl mx-auto">
-            Hear from our alumni who have transformed their careers through our program.
+            Hear from our students who have gained valuable skills and experience through the Sankalp Training Program.
           </p>
         </motion.div>
 

@@ -93,24 +93,28 @@ const Navbar = () => {
           </motion.div>
 
           <div className="hidden md:flex items-center space-x-8">
-            <NavLink href="#home">Home</NavLink>
-            <NavLink href="#programs">Programs</NavLink>
-            <NavLink href="#about">About</NavLink>
-            <NavLink href="#services">Services</NavLink>
-            <motion.button
-              className="bg-primary-600 text-white px-6 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors relative overflow-hidden group"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <motion.span
-                className="absolute inset-0 bg-white/30"
-                initial={{ x: "-100%" }}
-                whileHover={{ x: "100%" }}
-                transition={{ duration: 0.5 }}
-              />
-              <Link to={'/getstarted'}>Apply Now</Link>
-            </motion.button>
-          </div>
+ <NavLink href="#home">Home</NavLink>
+  <NavLink href="#programs">Programs</NavLink>
+  <NavLink href="#about">About</NavLink>
+  <NavLink href="#services">Services</NavLink>
+  <motion.div
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+  >
+    <Link 
+      to="/getstarted"
+      className="bg-primary-600 text-white px-6 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors relative overflow-hidden group inline-block"
+    >
+      <motion.span
+        className="absolute inset-0 bg-white/30"
+        initial={{ x: "-100%" }}
+        whileHover={{ x: "100%" }}
+        transition={{ duration: 0.5 }}
+      />
+      <span className="relative z-10">Apply Now</span>
+    </Link>
+  </motion.div>
+</div>
 
           <div className="md:hidden">
             <motion.button

@@ -152,7 +152,8 @@ const Founder = () => {
                 We offer personalized guidance, practical training, and guaranteed placement support. Join Sankalp to accelerate your tech career and achieve your professional goals.
               </motion.p>
               <motion.div className="flex items-center relative" variants={itemAnimation} whileHover={{ scale: 1.03 }}>
-                <motion.div className="relative mr-4">
+                <motion.a href="https://founder.spectov.in/" className="flex items-center" whileHover={{ scale: 1.02 }}>
+                  <motion.div className="relative mr-4">
                   <motion.div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full blur opacity-70"
                     animate={{ rotate: [0, 360], scale: [0.9, 1.1, 0.9] }}
                     transition={{ rotate: { duration: 10, repeat: Infinity, ease: "linear" }, scale: { duration: 4, repeat: Infinity, repeatType: "reverse" } }}
@@ -162,18 +163,19 @@ const Founder = () => {
                     alt="Vanshmani Jha"
                     className="h-14 w-14 rounded-full object-cover relative z-10 border-2 border-primary-500"
                   />
-                </motion.div>
-                <div>
+                  </motion.div>
+                  <div>
                   <motion.p className="font-bold text-white" whileHover={{ color: "#a78bfa" }}>
                     Vanshmani Jha
                   </motion.p>
                   <div className="flex items-center gap-1">
                     <p className="text-gray-400 text-sm">Founder & CEO, SpectoV</p>
                     <motion.span animate={{ x: [0, 4, 0] }} transition={{ duration: 1.5, repeat: Infinity, repeatType: "reverse" }}>
-                      <ChevronRight size={14} className="text-primary-400" />
+                    <ChevronRight size={14} className="text-primary-400" />
                     </motion.span>
                   </div>
-                </div>
+                  </div>
+                </motion.a>
               </motion.div>
             </motion.div>
             <motion.div className="relative h-64 lg:h-auto overflow-hidden" variants={imageContainerAnimation}>
