@@ -14,47 +14,52 @@ import * as THREE from 'three';
 // Testimonials Data
 const testimonials = [
   {
-    name: "Sachin",
-    role: "Student",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80",
-    content: "The training program was a fantastic initiative to empower learning and inspire innovation among tech enthusiasts. The content was highly valuable, and the overall experience was enriching.",
-    rating: 5
+    name: "Byagari Abhishek",
+    role: "Teegala Krishna Reddy Engineering College",
+    image: "/byagari.jpg",
+    content: "By doing this internship.Now I have complete idea web development and technologies used in it and now i am able build and small websites on my own and the teaching is very good and we are able to clarify our doubts",
+    rating: 4
   },
   {
-    name: "Akshat",
-    role: "Student",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80",
+    name: " Bathula Aravind",
+    role: "Gokaraju Rangaraju Institute of engineering and technology",
+    image: "/bathula.jpg",
     content: "The Sankalp Training Program by Specto V offered a strong foundation in AI/ML, combining theory and hands-on learning with knowledgeable instructors and excellent resources.",
     rating: 5
   },
+  
+    {
+  name: "Pamula Shruthi",
+  role: "CMR Technical Campus (CMRTC)",
+  image: "/pamula.jpg",
+  content: "The online classes were highly engaging and effective, with a clear and simple teaching style that made complex topics easy to understand. Doubts were always welcomed and resolved promptly, ensuring a smooth learning experience.",
+  rating: 5
+},
+
   {
-    name: "Sneh",
-    role: "Student",
-    image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80",
-    content: "The Sankalp Training Program offers valuable skills and opportunities, effectively bridging the gap between education and employability and can help a lot of individuals.",
-    rating: 5
-  },
+  name: "Apoorva M S",
+  role: "Terrafinn Technologies (Working Professional)",
+  image: "/apoorva.png",
+  content: "Despite holding degrees in CSE and Data Analytics, I truly grasped core concepts like Regression and Neural Networks only through Shashwat’s teaching. His classes boosted my confidence as a professional and equipped me well for future job opportunities.",
+  rating: 4
+},
+
   {
-    name: "Anieruth",
-    role: "Student",
-    image: "https://images.unsplash.com/photo-1507591064344-4c6ce005b128?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80",
-    content: "Through the Sankalp Training Program, I gained hands-on experience in AR/VR using tools like Blender, building 3D modeling skills and expanding my knowledge in this innovative field.",
-    rating: 5
-  },
+  name: "Aranmula Hari Krishna",
+  role: "Gokaraju Rangaraju Institute of Engineering",
+  image: "/aranmula.jpg",
+  content: "The Zoom classes on HTML, CSS, JavaScript, and React were clear and engaging, with a well-structured approach and practical examples that enhanced understanding and made learning enjoyable.",
+  rating: 5
+},
+
   {
-    name: "Daksh",
-    role: "Student",
-    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80",
-    content: "The Sankalp Training Program offers crucial skills and opportunities, and equips individuals with essential skills, enhancing employability.",
-    rating: 5
-  },
-  {
-    name: "Mohnish",
-    role: "Student",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80",
-    content: "The Sankalp program provided well-structured training with strong instructor support, enhancing my web development skills through real-world examples and hands-on tasks.",
-    rating: 5
-  }
+  name: "Pratik Bangerwa",
+  role: "VIT Chennai",
+  image: "/prateek.jpg",
+  content: "The AI class at Spectov was insightful and engaging, with the instructor breaking down complex concepts into simple, understandable parts, making it a truly enriching learning experience.",
+  rating: 4
+}
+
 ];
 
 const Testimonials = () => {
