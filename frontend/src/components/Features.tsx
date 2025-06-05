@@ -172,7 +172,7 @@ const Features = () => {
             Our Features
           </h2>
           <p className="text-lg text-gray-300 max-w-2xl mx-auto">
-            Explore the benefits of our program and how we help you achieve success.
+            Discover the advantages of our program and how we assist you in reaching success.
           </p>
         </motion.div>
 
