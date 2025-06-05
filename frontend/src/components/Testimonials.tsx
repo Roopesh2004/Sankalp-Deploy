@@ -40,7 +40,7 @@ const testimonials = [
   name: "Apoorva M S",
   role: "Terrafinn Technologies (Working Professional)",
   image: "/apoorva.png",
-  content: "Despite holding degrees in CSE and Data Analytics, I truly grasped core concepts like Regression and Neural Networks only through Shashwat’s teaching. His classes boosted my confidence as a professional and equipped me well for future job opportunities.",
+  content: "I joined SpectoV courses to revisit my knowledge, learn the missing basics, and prepare for interviews in future. I must say that this program was the best for me. I would have never got the value like this in any other course or YouTube videos.    I have learnt the topics which I could never learn in college properly before.",
   rating: 4
 },
 
