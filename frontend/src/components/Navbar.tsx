@@ -62,31 +62,35 @@ const Navbar = () => {
   return (
     <motion.nav 
       className={`fixed w-full z-50 transition-all duration-300 ${
-        scrolled ? 'bg-dark-200/95 backdrop-blur-sm shadow-lg' : 'bg-transparent'
+      scrolled ? 'bg-dark-200/95 backdrop-blur-sm shadow-lg' : 'bg-transparent'
       } py-4`}
       variants={navVariants}
       initial="hidden"
       animate="visible"
     >
       <div className="container mx-auto px-4 md:px-6">
-        <div className="flex justify-between items-center">
-          <motion.div 
-            className="flex items-center space-x-2"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <motion.div
-              animate={{
-                rotate: [0, 360],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "linear"
-              }}
-            >
-              <Zap className="h-8 w-8 text-primary-400" />
-            </motion.div>
+      <div className="flex justify-between items-center">
+      <motion.div 
+      className="flex items-center space-x-2"
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      >
+      <motion.div
+        animate={{
+        rotate: [0, 360],
+        }}
+        transition={{
+        duration: 4,
+        repeat: Infinity,
+        ease: "linear"
+        }}
+      >
+        <img 
+        src="/file.svg" 
+        alt="Logo" 
+        className="h-10 w-15 text-primary-400"
+        />
+        </motion.div>
             <span className="text-2xl font-bold text-white font-display">
               Sankalp<span className="text-primary-400"></span>
             </span>
