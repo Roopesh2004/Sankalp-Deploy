@@ -37,7 +37,7 @@ function App() {
   // SEO Enhancement - Complete Meta Tags Setup
   useEffect(() => {
     // Update document title with primary keywords
-    document.title = "Sankalp Training Program 2.0 | Global MNC Placements | Google Amazon Microsoft Jobs | SpectoV";
+    document.title = "Sankalp Training Program SpectoV";
     
     // Update meta description with compelling copy and keywords
     let metaDescription = document.querySelector('meta[name="description"]');
@@ -46,7 +46,7 @@ function App() {
       metaDescription.setAttribute('name', 'description');
       document.head.appendChild(metaDescription);
     }
-    metaDescription.setAttribute('content', 'Join Sankalp Training Program 2.0 by SpectoV. Global professional training with guaranteed placements in Google, Amazon, Microsoft and top MNCs. 500+ successful placements worldwide. Industry-focused curriculum with 100% placement guarantee.');
+    metaDescription.setAttribute('content', 'Join Sankalp Training Program by SpectoV. ');
 
     // Comprehensive keyword meta tag
     let metaKeywords = document.querySelector('meta[name="keywords"]');
@@ -68,7 +68,7 @@ function App() {
 
     // Comprehensive Open Graph tags for social media
     const ogTags = [
-      { property: 'og:title', content: 'Sankalp Training Program 2.0 | Global MNC Placements | SpectoV' },
+      { property: 'og:title', content: 'Sankalp Training Program   | SpectoV' },
       { property: 'og:description', content: 'Global professional training with guaranteed placements in Google, Amazon, Microsoft and top MNCs. 500+ successful placements worldwide.' },
       { property: 'og:url', content: 'https://sankalp.spectov.in/' },
       { property: 'og:type', content: 'website' },
@@ -95,7 +95,7 @@ function App() {
       { name: 'twitter:card', content: 'summary_large_image' },
       { name: 'twitter:site', content: '@spectov' },
       { name: 'twitter:creator', content: '@spectov' },
-      { name: 'twitter:title', content: 'Sankalp Training Program 2.0 | Global MNC Placements' },
+      { name: 'twitter:title', content: 'Sankalp Training Program | Global MNC Placements' },
       { name: 'twitter:description', content: 'Global professional training with guaranteed placements in Google, Amazon, Microsoft and top MNCs.' },
       { name: 'twitter:image', content: 'https://sankalp.spectov.in/images/sankalp-twitter-image.jpg' },
       { name: 'twitter:image:alt', content: 'Sankalp Global Training Program Success Stories' }
@@ -115,7 +115,7 @@ function App() {
     const organizationSchema = {
       "@context": "https://schema.org",
       "@type": "EducationalOrganization",
-      "name": "Sankalp Training Program 2.0",
+      "name": "Sankalp Training Program",
       "alternateName": ["Sankalp SpectoV", "SpectoV Global Training", "Sankalp Global Program"],
       "url": "https://sankalp.spectov.in",
       "logo": {
@@ -199,7 +199,7 @@ function App() {
     const courseSchema = {
       "@context": "https://schema.org",
       "@type": "Course",
-      "name": "Sankalp Training Program 2.0",
+      "name": "Sankalp Training Program ",
       "description": "Comprehensive 6-month professional training program with guaranteed global MNC placements",
       "provider": {
         "@type": "EducationalOrganization",
@@ -255,10 +255,10 @@ function App() {
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "What is Sankalp Training Program 2.0?",
+          "name": "What is Sankalp Training Program?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Sankalp Training Program 2.0 is a comprehensive 6-month professional development program by SpectoV that offers global training with guaranteed placements in top MNCs including Google, Amazon, and Microsoft."
+            "text": "Sankalp Training Program is a comprehensive 6-month professional development program by SpectoV that offers global training with guaranteed placements in top MNCs including Google, Amazon, and Microsoft."
           }
         },
         {
@@ -282,7 +282,7 @@ function App() {
           "name": "What is the success rate of global placements?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Sankalp Training Program 2.0 has achieved 100% placement success rate with over 500 graduates placed in top global MNCs with average salary packages ranging from 5-20 LPA."
+            "text": "Sankalp Training Program has achieved 100% placement success rate with over 500 graduates placed in top global MNCs with average salary packages ranging from 5-20 LPA."
           }
         }
       ]
@@ -293,7 +293,7 @@ function App() {
       "@context": "https://schema.org",
       "@type": "WebSite",
       "name": "Sankalp SpectoV Global Training",
-      "alternateName": "Sankalp Training Program 2.0",
+      "alternateName": "Sankalp Training Program",
       "url": "https://sankalp.spectov.in",
       "potentialAction": {
         "@type": "SearchAction",
@@ -401,7 +401,7 @@ function App() {
 
     // Add Dublin Core metadata
     const dublinCoreMetas = [
-      { name: 'DC.title', content: 'Sankalp Training Program 2.0 - Global MNC Placements' },
+      { name: 'DC.title', content: 'Sankalp Training Program - Global MNC Placements' },
       { name: 'DC.creator', content: 'SpectoV Global Training Solutions' },
       { name: 'DC.subject', content: 'Professional Training, Global Placements, MNC Jobs, Career Development' },
       { name: 'DC.description', content: 'Comprehensive global training program with guaranteed placements in top MNCs including Google, Amazon, Microsoft' },

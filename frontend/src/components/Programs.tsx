@@ -178,7 +178,7 @@ const Programs = () => {
             className="text-lg text-gray-300 max-w-2xl mx-auto"
             variants={titleVariants}
           >
-            Choose the program that aligns with your career goals and take the first step towards a successful tech career.
+            Select the program that meets your career ambition and get actionable next steps toward your tech career dreams. 
           </motion.p>
         </motion.div>
 
@@ -193,12 +193,12 @@ const Programs = () => {
             icon={<GraduationCap className="h-10 w-10 text-white" />}
             title="Undergraduate Program"
             subtitle="Crack Top Tech Companies"
-            description="For students looking to secure placements in top-tier companies, our Undergraduate Training Program is designed to build a strong foundation in coding, problem-solving, and real-world application development."
+            description="Select the program that meets your career ambition and get actionable next steps toward your tech career dreams. If you are a student wanting to land placement in A tier companies, our Undergraduate Training Programme will offer a solid foundation in coding, problem-solving and real world application development."
             features={[
-              "Expert mentorship from industry professionals",
-              "Real-world projects to build your portfolio",
-              "Comprehensive interview preparation",
-              "Placement assistance in leading MNCs and startups"
+              "Mentorship from expert industry professionals",
+              "Real world projects to add to your portfolio",
+              "Complete interview prep",
+              "Placement support in leading MNCs and start-ups"
             ]}
             color="from-primary-600 to-primary-800"
             variants={cardVariants}
@@ -208,12 +208,12 @@ const Programs = () => {
             icon={<Briefcase className="h-10 w-10 text-white" />}
             title="Career Transition Program"
             subtitle="Shift to Tech Roles"
-            description="If you're a working professional from a non-tech background and want to switch to a high-paying tech career, our Career Transition Program is for you."
+            description="If you are a working professional without a tech background and want to transition into a high-demand, high-paid tech career, then our Career Transition Program might be the right fit for you."
             features={[
               "Learn Full Stack Development, AI, App Development",
-              "Structured, hands-on learning approach",
-              "Industry-recognized skills certification",
-              "Career counseling and job placement support"
+              "Structured, hands-on learning experience",
+              "Certifications for skills recognized by the industry",
+              "Career counseling and help with job placement"
             ]}
             color="from-secondary-600 to-secondary-800"
             variants={cardVariants}
