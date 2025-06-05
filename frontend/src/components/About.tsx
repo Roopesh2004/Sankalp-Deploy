@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Zap, Code, Users, Globe } from 'lucide-react';
+import {Link,useNavigate } from "react-router-dom"
 
 const About = () => {
   const videoRef = useRef(null);
@@ -8,6 +9,49 @@ const About = () => {
   const [isMuted, setIsMuted] = useState(true);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [hovered, setHovered] = useState(null);
+
+
+  const JoinTeam=()=>{
+
+    const navigate = useNavigate();
+    
+      const handleApplyClick = () => {
+        navigate('/getstarted');
+        window.location.reload();
+      };
+
+    return(
+      <motion.button
+                className="relative bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium py-2.5 px-6 rounded-lg overflow-hidden group"
+                whileHover={{ 
+                  scale: 1.05,
+                  boxShadow: "0 0 20px rgba(124, 58, 237, 0.5)"
+                }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleApplyClick}
+                >
+                <motion.span className="relative z-10">Join Our Team</motion.span>
+                
+                {/* Gradient shift on hover */}
+                <motion.div 
+                  className="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-500 z-0 opacity-0"
+                  whileHover={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                />
+                
+                {/* Shine effect on hover */}
+                <motion.div 
+                  className="absolute inset-0 z-0 opacity-0 group-hover:opacity-50"
+                  initial={{ x: "-100%", skew: -20 }}
+                  whileHover={{ x: "100%" }}
+                  transition={{ type: "tween", ease: "easeInOut", duration: 1 }}
+                  style={{
+                  background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)"
+                  }}
+                />
+                </motion.button>
+    )
+  }
   
   // Handle video playback when component mounts
   useEffect(() => {
@@ -408,35 +452,7 @@ const About = () => {
               variants={textAnimation}
               custom={0.7}
             >
-                <motion.button
-                className="relative bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium py-2.5 px-6 rounded-lg overflow-hidden group"
-                whileHover={{ 
-                  scale: 1.05,
-                  boxShadow: "0 0 20px rgba(124, 58, 237, 0.5)"
-                }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => window.location.href = '/getstarted'}
-                >
-                <motion.span className="relative z-10">Join Our Team</motion.span>
-                
-                {/* Gradient shift on hover */}
-                <motion.div 
-                  className="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-500 z-0 opacity-0"
-                  whileHover={{ opacity: 1 }}
-                  transition={{ duration: 0.3 }}
-                />
-                
-                {/* Shine effect on hover */}
-                <motion.div 
-                  className="absolute inset-0 z-0 opacity-0 group-hover:opacity-50"
-                  initial={{ x: "-100%", skew: -20 }}
-                  whileHover={{ x: "100%" }}
-                  transition={{ type: "tween", ease: "easeInOut", duration: 1 }}
-                  style={{
-                  background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)"
-                  }}
-                />
-                </motion.button>
+                <JoinTeam/>
             </motion.div>
           </motion.div>
         </div>

@@ -58,7 +58,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setLoading(false);
         return;
       }
-  
+
       console.log('Attempting login with:', email);
   
       // Regular student login via API
@@ -70,7 +70,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   
       const data = await response.json();
       console.log('Login response:', data);
-  
+   
       if (!response.ok) {
         throw new Error(data.message || 'Login failed');
       }

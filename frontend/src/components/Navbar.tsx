@@ -1,11 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X, Code, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {Link} from "react-router-dom"
+import {Link,useNavigate } from "react-router-dom"
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  const ApplyButton = () => {
+  const navigate = useNavigate();
+
+  const handleApplyClick = () => {
+    navigate('/getstarted');
+    window.location.reload();
+  };
+
+  return (
+    <button
+      onClick={handleApplyClick}
+      className="bg-primary-600 text-white px-6 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors relative overflow-hidden group inline-block"
+    >
+      <motion.span
+        className="absolute inset-0 bg-white/30"
+        initial={{ x: '-100%' }}
+        whileHover={{ x: '100%' }}
+        transition={{ duration: 0.5 }}
+      />
+      <span className="relative z-10">Apply Now</span>
+    </button>
+  );
+};
 
   useEffect(() => {
     const handleScroll = () => {
@@ -97,23 +121,7 @@ const Navbar = () => {
   <NavLink href="#programs">Programs</NavLink>
   <NavLink href="#about">About</NavLink>
   <NavLink href="#services">Services</NavLink>
-  <motion.div
-    whileHover={{ scale: 1.05 }}
-    whileTap={{ scale: 0.95 }}
-  >
-    <Link 
-      to="/getstarted"
-      className="bg-primary-600 text-white px-6 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors relative overflow-hidden group inline-block"
-    >
-      <motion.span
-        className="absolute inset-0 bg-white/30"
-        initial={{ x: "-100%" }}
-        whileHover={{ x: "100%" }}
-        transition={{ duration: 0.5 }}
-      />
-      <span className="relative z-10">Apply Now</span>
-    </Link>
-  </motion.div>
+  <ApplyButton/>
 </div>
 
           <div className="md:hidden">

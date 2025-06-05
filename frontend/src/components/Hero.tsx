@@ -5,6 +5,7 @@ import Typewriter from 'typewriter-effect';
 import * as THREE from 'three';
 import { SphereAnimation } from '../extras/Sphere';
 import Features from './Features';
+import {Link,useNavigate } from "react-router-dom"
 
 const Hero = () => {
   const mountRef = useRef(null);
@@ -15,6 +16,44 @@ const Hero = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isLowPerfDevice, setIsLowPerfDevice] = useState(false);
   const [animationInitialized, setAnimationInitialized] = useState(false);
+
+
+  const GetStarted=()=>{
+
+    const navigate = useNavigate();
+
+    const handleApplyClick = () => {
+      navigate('/getstarted');
+      window.location.reload();
+    };
+
+
+    return(
+      <motion.div
+        onClick={handleApplyClick}
+        className="bg-primary-600 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full font-medium transition-colors flex items-center justify-center gap-2 relative overflow-hidden group"
+        whileHover={{ 
+        scale: 1.05,
+        boxShadow: "0 0 25px rgba(124, 58, 237, 0.5)"
+        }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <motion.span
+        className="absolute inset-0 bg-white/30"
+        initial={{ x: "-100%" }}
+        whileHover={{ x: "100%" }}
+        transition={{ duration: 0.5 }}
+        />
+        Get Started 
+        <motion.span
+        animate={{ x: [0, 5, 0] }}
+        transition={{ duration: 1, repeat: Infinity }}
+        >
+        <ArrowRight size={18} />
+        </motion.span>
+      </motion.div>    
+    )
+  }
 
   // Create and initialize the THREE.js scene
   const initializeScene = () => {
@@ -340,29 +379,7 @@ const Hero = () => {
                 variants={titleAnimation}
               >
                 
-                <motion.a
-                  href="/getstarted"
-                  className="bg-primary-600 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full font-medium transition-colors flex items-center justify-center gap-2 relative overflow-hidden group"
-                  whileHover={{ 
-                  scale: 1.05,
-                  boxShadow: "0 0 25px rgba(124, 58, 237, 0.5)"
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <motion.span
-                  className="absolute inset-0 bg-white/30"
-                  initial={{ x: "-100%" }}
-                  whileHover={{ x: "100%" }}
-                  transition={{ duration: 0.5 }}
-                  />
-                  Get Started 
-                  <motion.span
-                  animate={{ x: [0, 5, 0] }}
-                  transition={{ duration: 1, repeat: Infinity }}
-                  >
-                  <ArrowRight size={18} />
-                  </motion.span>
-                </motion.a>                
+                <GetStarted/>            
                <motion.div
   whileHover={{ scale: 1.05 }}
   whileTap={{ scale: 0.95 }}

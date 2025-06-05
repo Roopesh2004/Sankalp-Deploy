@@ -147,9 +147,9 @@ interface Course {
   id: number;
   title: string;
   description: string;
-  duration: string;
+  created_at: string;
   level: string;
-  image?: string;
+  thumbnail?: string;
 }
 
 interface Module {
@@ -441,9 +441,9 @@ export const StudentDashboard: React.FC = () => {
                               id: course.id,
                               title: course.title || '',
                               description: course.description || '',
-                              duration: course.duration || '',
+                              created: course.created_at || '',
                               level: course.level || '',
-                              image: course.image || ''
+                              image: course.thumbnail || ''
                             }}
                             onClick={() => changeView(course.id.toString())}
                           />

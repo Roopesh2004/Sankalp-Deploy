@@ -6,7 +6,7 @@ interface CourseCardProps {
     id: number;
     title: string;
     description: string;
-    duration: string;
+    created: string;
     level: string;
     image?: string;
   };
@@ -44,7 +44,6 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, onClick }) => {
         </p>
         
         <div className="flex justify-between text-xs text-gray-500">
-          <span>{course.duration}</span>
           <span>{course.level}</span>
         </div>
       </div>
