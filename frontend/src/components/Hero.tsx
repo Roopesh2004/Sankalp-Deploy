@@ -332,7 +332,7 @@ const Hero = () => {
                 className="text-base md:text-lg text-gray-300 mb-6 md:mb-8 max-w-xl"
                 variants={titleAnimation}
               >
-                Join our comprehensive training program and master the skills that top tech companies demand. Get hands-on experience, mentorship, and guaranteed placement opportunities.
+                Enroll in our in-depth training program today and conquer the skills that leading tech companies are always looking for. Benefit from expert guidance, practical training, and secured job placement.
               </motion.p>
               
               <motion.div 

@@ -12,13 +12,13 @@ const routes = createBrowserRouter([
     element: <App/>,
     handle: {
       seo: {
-        title: "Sankalp Training Program 2.0 | Global MNC Placements | Google Amazon Microsoft Jobs",
-        description: "Join Sankalp Training Program 2.0 by SpectoV. Global professional training with guaranteed placements in Google, Amazon, Microsoft and top MNCs worldwide. 500+ success stories.",
+        title: "Sankalp Training Program ",
+        description: "Join Sankalp Training Program  by SpectoV. Global professional training with guaranteed placements in Google, Amazon, Microsoft and top MNCs worldwide. 500+ success stories.",
         keywords: "sankalp training program, sankalp spectov, spectov internship, sankalp internship, global mnc placements, google jobs, amazon careers, microsoft placements",
         canonical: "/",
         structuredData: {
           "@type": "WebPage",
-          "name": "Sankalp Training Program 2.0 - Home",
+          "name": "Sankalp Training Program  - Home",
           "description": "Global professional training program with MNC placements"
         }
       }
@@ -29,8 +29,8 @@ const routes = createBrowserRouter([
     element: <GetStarted/>,
     handle: {
       seo: {
-        title: "Apply Now | Sankalp Training Program 2.0 | Global MNC Placement Application",
-        description: "Start your journey with Sankalp Training Program 2.0. Apply for global MNC placements in Google, Amazon, Microsoft. Secure your future with guaranteed job placement.",
+        title: "Apply Now | Sankalp Training Program  | Global MNC Placement Application",
+        description: "Start your journey with Sankalp Training Program . Apply for global MNC placements in Google, Amazon, Microsoft. Secure your future with guaranteed job placement.",
         keywords: "sankalp training application, spectov internship application, get started sankalp, join sankalp program, mnc job application, global placement program",
         canonical: "/getstarted",
         structuredData: {
@@ -98,7 +98,7 @@ const routes = createBrowserRouter([
     handle: {
       seo: {
         title: "Global MNC Placements | Google Amazon Microsoft Careers | Sankalp Success Stories",
-        description: "500+ successful global MNC placements through Sankalp Training Program 2.0. Join professionals working in Google, Amazon, Microsoft, Meta, Apple worldwide.",
+        description: "500+ successful global MNC placements through Sankalp Training Program . Join professionals working in Google, Amazon, Microsoft, Meta, Apple worldwide.",
         keywords: "global mnc placements, google placements, amazon jobs, microsoft careers, meta jobs, apple careers, international job placement, global career opportunities",
         canonical: "/global-mnc-placements",
         structuredData: {
@@ -132,7 +132,7 @@ const routes = createBrowserRouter([
     handle: {
       seo: {
         title: "Professional Certification Program | Industry-Recognized Credentials | Global Career Boost",
-        description: "Earn industry-recognized professional certifications through Sankalp Training Program 2.0. Boost your global career with credentials valued by top MNCs.",
+        description: "Earn industry-recognized professional certifications through Sankalp Training Program . Boost your global career with credentials valued by top MNCs.",
         keywords: "professional certification program, industry certification, global career credentials, professional development certification, mnc recognized certification, career advancement program",
         canonical: "/professional-certification-program",
         structuredData: {
@@ -166,7 +166,7 @@ const routes = createBrowserRouter([
     handle: {
       seo: {
         title: "Global Placement Guarantee | 100% Job Placement Assurance | MNC Career Security",
-        description: "100% placement guarantee with Sankalp Training Program 2.0. Secure your future with guaranteed job placement in top global MNCs including Google, Amazon, Microsoft.",
+        description: "100% placement guarantee with Sankalp Training Program . Secure your future with guaranteed job placement in top global MNCs including Google, Amazon, Microsoft.",
         keywords: "global placement guarantee, 100% job placement, placement assurance, mnc job guarantee, career security, guaranteed employment, job placement program",
         canonical: "/global-placement-guarantee",
         structuredData: {
@@ -494,7 +494,7 @@ const addParentDomainSignals = () => {
           "@type": "Offer",
           "itemOffered": {
             "@type": "Course",
-            "name": "Sankalp Training Program 2.0",
+            "name": "Sankalp Training Program ",
             "url": "https://sankalp.spectov.in",
             "provider": {
               "@type": "Organization",

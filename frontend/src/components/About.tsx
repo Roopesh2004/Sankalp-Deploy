@@ -328,7 +328,7 @@ const About = () => {
               variants={textAnimation}
               custom={0.3}
             >
-              At SpectoV Pvt Ltd, we are committed to creating an environment that fosters innovation, learning, and professional growth. Our training programs are designed to bridge the gap between academic learning and industry requirements.
+              SpectoV Pvt Ltd is dedicated to establishing an atmosphere that encourages innovation, learning, and advancement. Our training programs are aimed at closing the gap between what is learned in school and what the industry needs.
             </motion.p>
             
             <motion.p 
@@ -336,7 +336,7 @@ const About = () => {
               variants={textAnimation}
               custom={0.4}
             >
-              We ensure our interns are well-prepared to tackle real-world challenges and succeed in their tech careers. Our focus is on practical skills, industry exposure, and career development.
+              We provide our interns with the capabilities to take on real-world challenges and be successful in tech careers. Our focus is on practical knowledge, exposure to the industry, and career development.
             </motion.p>
             
             {/* Feature cards */}

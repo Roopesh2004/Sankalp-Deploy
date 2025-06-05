@@ -3,13 +3,10 @@ import { AuthProvider } from '../context/AuthContext';
 import { Login } from '../pages/Login';
 import { StudentDashboard } from '../pages/StudentDashboard';
 import { AdminDashboard } from '../pages/AdminDashboard';
-import { useAuth } from '../context/AuthContext';
 
 const AuthenticatedApp: React.FC = () => {
-  const { user } = useAuth();
-
-  if (!user) return <Login />;
-  return user.role === 'admin' ? <AdminDashboard /> : <StudentDashboard />;
+  // Always show Login page - no authentication required
+  return <Login />;
 };
 
 function GetStarted() {
