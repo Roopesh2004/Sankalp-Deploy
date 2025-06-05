@@ -146,10 +146,10 @@ const Founder = () => {
                 </motion.span>
               </motion.h2>
               <motion.p className="text-gray-300 mb-6" variants={itemAnimation}>
-                Sankalp Training Program empowers you with industry-ready skills and real-world experience. Our focused curriculum, expert mentors, and hands-on projects ensure you are prepared for top roles at leading global companies.
+                Sankalp Training Program provides you with industry-relevant skills and real-world experience. With focused curriculum, experienced mentors, and real-life projects, you'll be ready for the best roles at the world's top companies.
               </motion.p>
-              <motion.p className="text-gray-300 mb-6" variants={itemAnimation}>
-                We offer personalized guidance, practical training, and guaranteed placement support. Join Sankalp to accelerate your tech career and achieve your professional goals.
+              <motion.p className="text-gray-300 mb-6" variants={itemAnimation}>             
+                Personalized guidance, hands-on training, and placement support is guaranteed. Join Sankalp today, and transform your tech career to achieve professional aspirations. 
               </motion.p>
               <motion.div className="flex items-center relative" variants={itemAnimation} whileHover={{ scale: 1.03 }}>
                 <motion.a href="https://founder.spectov.in/" className="flex items-center" whileHover={{ scale: 1.02 }}>

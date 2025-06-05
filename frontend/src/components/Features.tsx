@@ -202,7 +202,7 @@ const Features = () => {
                 <FeatureCard
                   icon={<Rocket className="h-8 w-8 text-primary-400" />}
                   title="100% Placement"
-                  description="Guaranteed placement assistance for all trainees, ensuring jobs in top tech companies."
+                  description="Placement support is assured for all trainees, regardless of their specialization, within leading IT firms."
                   variants={itemVariants}
                   iconVariants={iconAnimation}
                 />
@@ -212,7 +212,7 @@ const Features = () => {
                 <FeatureCard
                   icon={<Briefcase className="h-8 w-8 text-primary-400" />}
                   title="Paid Internship"
-                  description="Every successful candidate secures a 100% paid internship with a stipend of up to ₹10,000."
+                  description="All successful candidates are guaranteed a fully paid internship with a monthly stipend on completion of the course."
                   variants={itemVariants}
                   iconVariants={iconAnimation}
                 />
@@ -222,7 +222,7 @@ const Features = () => {
                 <FeatureCard
                   icon={<Users className="h-8 w-8 text-primary-400" />}
                   title="Expert Mentorship"
-                  description="Get 1-on-1 mentorship from experienced professionals in the tech industry."
+                  description="Receive individual guidance and doubt clearance from reputed tech professionals and industry veterans."                                                
                   variants={itemVariants}
                   iconVariants={iconAnimation}
                 />
@@ -232,7 +232,7 @@ const Features = () => {
                 <FeatureCard
                   icon={<Award className="h-8 w-8 text-primary-400" />}
                   title="Real-World Projects"
-                  description="Work on industry-relevant projects to build a strong portfolio and gain practical experience."
+                  description="Participate in practical projects relevant to the industry to enhance your resume and professional experience."
                   variants={itemVariants}
                   iconVariants={iconAnimation}
                 />
