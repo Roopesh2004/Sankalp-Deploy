@@ -128,11 +128,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           </h2>
         </div>
         
-        {/* {(formError || error) && (
+        {(formError==="Invalid email or password" || error==="Invalid email or password") && (
           <div className="mb-6 bg-red-900/20 border border-red-800 text-red-400 px-4 py-3 rounded-lg" style={{ animation: 'slideInUp 0.4s ease-out forwards' }}>
             {formError || error}
           </div>
-        )} */}
+        )}
         
         <div className="mb-5 input-group input-group-1">
           <label className="block text-gray-300 text-sm font-medium mb-2" htmlFor="email">

@@ -28,6 +28,7 @@ export const AdminDashboard: React.FC = () => {
             Name: item.name,
             Email: item.email,
             TransactionId: item.transactionid,
+            ReferalId: item.referalid,
             Course: item.courseName,
             Amount: item.amount,
             CourseId: item.courseId,
@@ -312,6 +313,12 @@ export const AdminDashboard: React.FC = () => {
                             <span className="text-gray-400 text-sm">Transaction ID: </span>
                             {item.TransactionId}
                           </p>
+                          {item.ReferalId && 
+                          <p className="text-gray-300 break-all">
+                            <span className="text-gray-400 text-sm">Referal ID: </span>
+                            {item.ReferalId}
+                          </p>
+                          }
                         </div>
                       </div>
                       
