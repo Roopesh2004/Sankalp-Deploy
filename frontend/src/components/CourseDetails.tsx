@@ -39,7 +39,8 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
   const [transactionId, setTransactionId] = useState('');
   const [referalId, setReferalId] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [registrationStatus, setRegistrationStatus] = useState<'not_registered' | 'pending' | 'approved'>();
+  const [registrationStatus, setRegistrationStatus] = useState<'not_registered' | 'pending' | 'approved' | null>(null);
+  const [isCheckingStatus, setIsCheckingStatus] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [selectedVideo, setSelectedVideo] = useState<number | null>(null);
@@ -95,7 +96,13 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
   // Check if user has already registered or has been approved for this course
   useEffect(() => {
     const checkRegistrationStatus = async () => {
-      if (!email) return;
+      if (!email) {
+        setRegistrationStatus('not_registered');
+        setIsCheckingStatus(false);
+        return;
+      }
+      
+      setIsCheckingStatus(true);
       
       try {
         // Check pending status
@@ -109,9 +116,11 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
         
         if (pendingData.value === 1) {
           setRegistrationStatus('approved');
+          setIsCheckingStatus(false);
           return;
         } else if (pendingData.value === 0) {
           setRegistrationStatus('pending');
+          setIsCheckingStatus(false);
           return;
         }
         
@@ -131,6 +140,9 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
         }
       } catch (error) {
         console.error('Error checking registration status:', error);
+        setRegistrationStatus('not_registered');
+      } finally {
+        setIsCheckingStatus(false);
       }
     };
     
@@ -400,7 +412,16 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
         <p className="text-gray-300">{course.description}</p>
       </div>
       
-      {renderContent()}
+      {/* Show loading state while checking registration status */}
+      {isCheckingStatus ? (
+        <div className="bg-dark-200 p-6 rounded-lg text-center">
+          <div className="text-primary-400 text-4xl mb-4">⏳</div>
+          <h3 className="text-lg font-semibold text-primary-400 mb-2">Checking Registration Status</h3>
+          <p className="text-gray-400">Please wait while we verify your access...</p>
+        </div>
+      ) : (
+        renderContent()
+      )}
     </div>
   );
 };
