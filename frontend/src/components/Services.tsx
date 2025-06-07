@@ -145,67 +145,67 @@ const Services = () => {
   // Services data with background images instead of gradients
   const services = [
     {
-      title: "AppDev",
       description: "Complete App Development program covering mobile app development for iOS and Android platforms using modern frameworks like React Native, Flutter, and native development.",
       backgroundImage: "/appdev.png",
       color: "from-green-600 to-green-800",
-      highlight: "green"
+      highlight: "green",
+      link: "/getstarted"
     },
     {
-      title: "Cloud Computing",
       description: "Master cloud technologies including AWS, Azure, Google Cloud Platform. Learn cloud architecture, deployment strategies, serverless computing, and cloud security practices.",
       backgroundImage: "/cc.png",
       color: "from-purple-600 to-purple-800",
-      highlight: "purple"
+      highlight: "purple",
+      link: "/getstarted"
     },
     {
-      title: "Competitive Programming",
       description: "Competitive Programming mastery course focusing on algorithms, data structures, problem-solving techniques, and contest strategies for coding competitions and technical interviews.",
       backgroundImage: "/cp.jpg",
       color: "from-red-600 to-red-800",
-      highlight: "red"
+      highlight: "red",
+      link: "/getstarted"
     },
     {
-      title: "Data Analytics",
       description: "Comprehensive data analytics program covering statistical analysis, data visualization, Python/R programming, SQL, and business intelligence tools for data-driven decision making.",
       backgroundImage: "/da.jpg",
       color: "from-yellow-600 to-yellow-800",
-      highlight: "yellow"
+      highlight: "yellow",
+      link: "/getstarted"
     },
     {
-      title: "DeepLearning",
       description: "Advanced deep learning course covering neural networks, CNNs, RNNs, transformers, and cutting-edge architectures. Hands-on experience with TensorFlow and PyTorch frameworks.",
       backgroundImage: "/dl.jpg",
       color: "from-indigo-600 to-indigo-800",
-      highlight: "indigo"
+      highlight: "indigo",
+      link: "/getstarted"
     },
     {
-      title: "DevOps",
       description: "Complete DevOps engineering course covering CI/CD pipelines, containerization with Docker, Kubernetes orchestration, infrastructure as code, and cloud deployment strategies.",
       backgroundImage: "/devops.jpg",
       color: "from-teal-600 to-teal-800",
-      highlight: "teal"
+      highlight: "teal",
+      link: "/getstarted"
     },
     {
-      title: "Gen AI",
       description: "Cutting-edge Generative AI course covering large language models, prompt engineering, fine-tuning techniques, and building AI-powered applications with modern frameworks.",
       backgroundImage: "/genai.jpg",
       color: "from-pink-600 to-pink-800",
-      highlight: "pink"
+      highlight: "pink",
+      link: "/getstarted"
     },
     {
-      title: "Machine Learning",
       description: "Comprehensive machine learning program covering supervised and unsupervised learning, feature engineering, model evaluation, and deployment of ML models in production environments.",
       backgroundImage: "/ml.jpg",
       color: "from-cyan-600 to-cyan-800",
-      highlight: "cyan"
+      highlight: "cyan",
+      link: "/getstarted"
     },
     {
-      title: "WebDev",
       description: "Full-stack web development course covering HTML, CSS, JavaScript, React, Node.js, databases, and modern web development practices for building scalable web applications.",
       backgroundImage: "/webdev.jpg",
       color: "from-orange-600 to-orange-800",
-      highlight: "orange"
+      highlight: "orange",
+      link: "/getstarted"
     }
   ];
 
