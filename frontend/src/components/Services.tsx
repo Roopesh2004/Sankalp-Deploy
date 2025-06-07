@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useAnimation, Variants } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
 import { 
   Brain, 
   Code, 
@@ -15,11 +14,6 @@ import {
 import * as THREE from 'three';
 
 const Services = () => {
-  const [ref, inView] = useInView({
-    triggerOnce: false,
-    threshold: 0.1,
-  });
-  
   const mountRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number>();
 
@@ -145,6 +139,7 @@ const Services = () => {
   // Services data with background images instead of gradients
   const services = [
     {
+      
       description: "Complete App Development program covering mobile app development for iOS and Android platforms using modern frameworks like React Native, Flutter, and native development.",
       backgroundImage: "/appdev.png",
       color: "from-green-600 to-green-800",
@@ -152,6 +147,7 @@ const Services = () => {
       link: "/getstarted"
     },
     {
+      
       description: "Master cloud technologies including AWS, Azure, Google Cloud Platform. Learn cloud architecture, deployment strategies, serverless computing, and cloud security practices.",
       backgroundImage: "/cc.png",
       color: "from-purple-600 to-purple-800",
@@ -159,6 +155,7 @@ const Services = () => {
       link: "/getstarted"
     },
     {
+      
       description: "Competitive Programming mastery course focusing on algorithms, data structures, problem-solving techniques, and contest strategies for coding competitions and technical interviews.",
       backgroundImage: "/cp.jpg",
       color: "from-red-600 to-red-800",
@@ -166,6 +163,7 @@ const Services = () => {
       link: "/getstarted"
     },
     {
+      
       description: "Comprehensive data analytics program covering statistical analysis, data visualization, Python/R programming, SQL, and business intelligence tools for data-driven decision making.",
       backgroundImage: "/da.jpg",
       color: "from-yellow-600 to-yellow-800",
@@ -173,6 +171,7 @@ const Services = () => {
       link: "/getstarted"
     },
     {
+      
       description: "Advanced deep learning course covering neural networks, CNNs, RNNs, transformers, and cutting-edge architectures. Hands-on experience with TensorFlow and PyTorch frameworks.",
       backgroundImage: "/dl.jpg",
       color: "from-indigo-600 to-indigo-800",
@@ -180,6 +179,7 @@ const Services = () => {
       link: "/getstarted"
     },
     {
+     
       description: "Complete DevOps engineering course covering CI/CD pipelines, containerization with Docker, Kubernetes orchestration, infrastructure as code, and cloud deployment strategies.",
       backgroundImage: "/devops.jpg",
       color: "from-teal-600 to-teal-800",
@@ -187,6 +187,7 @@ const Services = () => {
       link: "/getstarted"
     },
     {
+      
       description: "Cutting-edge Generative AI course covering large language models, prompt engineering, fine-tuning techniques, and building AI-powered applications with modern frameworks.",
       backgroundImage: "/genai.jpg",
       color: "from-pink-600 to-pink-800",
@@ -194,6 +195,7 @@ const Services = () => {
       link: "/getstarted"
     },
     {
+      
       description: "Comprehensive machine learning program covering supervised and unsupervised learning, feature engineering, model evaluation, and deployment of ML models in production environments.",
       backgroundImage: "/ml.jpg",
       color: "from-cyan-600 to-cyan-800",
@@ -201,6 +203,7 @@ const Services = () => {
       link: "/getstarted"
     },
     {
+      
       description: "Full-stack web development course covering HTML, CSS, JavaScript, React, Node.js, databases, and modern web development practices for building scalable web applications.",
       backgroundImage: "/webdev.jpg",
       color: "from-orange-600 to-orange-800",
@@ -208,6 +211,11 @@ const Services = () => {
       link: "/getstarted"
     }
   ];
+
+  const handleCardClick = () => {
+    // Navigate to /getstarted
+    window.location.href = '/getstarted';
+  };
 
   return (
     <section id="services" className="py-20 bg-black relative overflow-hidden">
@@ -220,7 +228,7 @@ const Services = () => {
             className="text-3xl md:text-5xl font-bold text-white mb-4 font-display"
             variants={titleVariants}
             initial="hidden"
-            animate={inView ? "visible" : "hidden"}
+            animate="visible"
           >
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-violet-400 to-purple-600">
               Our Courses
@@ -229,7 +237,7 @@ const Services = () => {
           <motion.p 
             className="text-lg text-gray-300 max-w-2xl mx-auto"
             initial={{ opacity: 0, y: 20 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
           >
             Explore our comprehensive range of technical courses designed to prepare you for the future of technology with hands-on learning and industry expertise.
@@ -237,10 +245,9 @@ const Services = () => {
         </div>
 
         <motion.div
-          ref={ref}
           variants={containerVariants}
           initial="hidden"
-          animate={inView ? "visible" : "hidden"}
+          animate="visible"
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
         >
           {services.map((service, index) => (
@@ -253,6 +260,7 @@ const Services = () => {
               color={service.color}
               highlight={service.highlight}
               delay={index * 0.1}
+              onClick={handleCardClick}
             />
           ))}
         </motion.div>
@@ -269,6 +277,7 @@ interface ServiceCardProps {
   color: string;
   highlight: string;
   delay: number;
+  onClick: () => void;
 }
 
 const ServiceCard = ({ 
@@ -278,7 +287,8 @@ const ServiceCard = ({
   backgroundImage,
   color,
   highlight,
-  delay
+  delay,
+  onClick
 }: ServiceCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const controls = useAnimation();
@@ -347,9 +357,10 @@ const ServiceCard = ({
       variants={cardVariants}
       initial="hidden"
       animate={controls}
-      className="bg-dark-300/80 backdrop-blur-sm rounded-xl overflow-hidden transition-all duration-300 border border-dark-400 relative"
+      className="bg-dark-300/80 backdrop-blur-sm rounded-xl overflow-hidden transition-all duration-300 border border-dark-400 relative cursor-pointer"
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
+      onClick={onClick}
       style={{ transformStyle: 'preserve-3d' }}
     >
       {/* Animated glow effect */}

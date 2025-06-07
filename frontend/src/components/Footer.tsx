@@ -423,6 +423,97 @@ const Footer = () => {
               </motion.li>
             </motion.ul>
           </motion.div>
+
+          {/* Mascot Image Section */}
+          <motion.div 
+            variants={itemAnimation}
+            className="flex justify-center lg:justify-end items-start"
+          >
+            <motion.div
+              className="relative"
+              initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
+              whileInView={{ 
+                opacity: 1, 
+                scale: 1, 
+                rotate: 0,
+                transition: {
+                  type: "spring",
+                  stiffness: 100,
+                  damping: 15,
+                  delay: 0.5
+                }
+              }}
+              viewport={{ once: true }}
+              whileHover={{ 
+                scale: 1.05,
+                rotate: 2,
+                transition: { type: "spring", stiffness: 300 }
+              }}
+            >
+              <motion.img
+                src="/mascot.png"
+                alt="SpectoV Mascot"
+                className="w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 object-contain rounded-2xl shadow-2xl"
+                animate={{
+                  y: [0, -10, 0],
+                  boxShadow: [
+                    "0 10px 30px rgba(124, 58, 237, 0.2)",
+                    "0 20px 40px rgba(124, 58, 237, 0.4)",
+                    "0 10px 30px rgba(124, 58, 237, 0.2)"
+                  ]
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  ease: "easeInOut"
+                }}
+              />
+              
+              {/* Glowing ring around mascot */}
+              <motion.div
+                className="absolute inset-0 rounded-2xl border-2 border-primary-400/30"
+                animate={{
+                  scale: [1, 1.1, 1],
+                  opacity: [0.3, 0.6, 0.3],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  repeatType: "reverse"
+                }}
+              />
+              
+              {/* Sparkle effects around mascot */}
+              <motion.div
+                className="absolute -top-2 -right-2 w-4 h-4 bg-primary-400 rounded-full"
+                animate={{
+                  scale: [0, 1, 0],
+                  opacity: [0, 1, 0],
+                  rotate: [0, 180, 360]
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  repeatDelay: 1
+                }}
+              />
+              
+              <motion.div
+                className="absolute -bottom-2 -left-2 w-3 h-3 bg-primary-300 rounded-full"
+                animate={{
+                  scale: [0, 1, 0],
+                  opacity: [0, 0.8, 0],
+                  rotate: [0, -180, -360]
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  repeatDelay: 0.5
+                }}
+              />
+            </motion.div>
+          </motion.div>
         </motion.div>
         
         <motion.div 
