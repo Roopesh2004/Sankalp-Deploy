@@ -244,7 +244,7 @@ app.post('/api/login', async (req, res) => {
 
   app.post('/api/pending', async (req, res) => {
     try {
-      const { name, email, transid, courseName, amt, courseId } = req.body;
+      const { name, email, transid, refid , courseName, amt, courseId } = req.body;
       
       console.log(`Pending registration for email: ${email}, course: ${courseName}`);
       
@@ -272,8 +272,8 @@ app.post('/api/login', async (req, res) => {
       
       // Insert into pending table
       const [result] = await connection.execute(
-        'INSERT INTO pending (name, email, transactionid, courseName, amount, courseId, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [name, email, transid, courseName, amt, courseId, 0]
+        'INSERT INTO pending (name, email, transactionid, referalid, courseName, amount, courseId, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [name, email, transid, refid, courseName, amt, courseId, 0]
       );
       
       connection.release();

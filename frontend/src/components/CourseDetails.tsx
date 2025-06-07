@@ -37,7 +37,10 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
   const { user } = useAuth();
   const [activeModule, setActiveModule] = useState<number | null>(null);
   const [transactionId, setTransactionId] = useState('');
-  const [registrationStatus, setRegistrationStatus] = useState<'not_registered' | 'pending' | 'approved'>('not_registered');
+  const [referalId, setReferalId] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [registrationStatus, setRegistrationStatus] = useState<'not_registered' | 'pending' | 'approved' | null>(null);
+  const [isCheckingStatus, setIsCheckingStatus] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [selectedVideo, setSelectedVideo] = useState<number | null>(null);
@@ -93,7 +96,13 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
   // Check if user has already registered or has been approved for this course
   useEffect(() => {
     const checkRegistrationStatus = async () => {
-      if (!email) return;
+      if (!email) {
+        setRegistrationStatus('not_registered');
+        setIsCheckingStatus(false);
+        return;
+      }
+      
+      setIsCheckingStatus(true);
       
       try {
         // Check pending status
@@ -107,9 +116,11 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
         
         if (pendingData.value === 1) {
           setRegistrationStatus('approved');
+          setIsCheckingStatus(false);
           return;
         } else if (pendingData.value === 0) {
           setRegistrationStatus('pending');
+          setIsCheckingStatus(false);
           return;
         }
         
@@ -129,6 +140,9 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
         }
       } catch (error) {
         console.error('Error checking registration status:', error);
+        setRegistrationStatus('not_registered');
+      } finally {
+        setIsCheckingStatus(false);
       }
     };
     
@@ -143,6 +157,11 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
       return;
     }
     
+    if (!acceptedTerms) {
+      setErrorMessage('Please accept the terms and conditions to proceed');
+      return;
+    }
+    
     setIsSubmitting(true);
     setErrorMessage('');
     
@@ -154,6 +173,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
           name: name || user?.name || 'Unknown User',
           email: email,
           transid: transactionId,
+          refid: referalId,
           courseName: course.title,
           amt: course.price,
           courseId: course.id
@@ -269,7 +289,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
                 <form onSubmit={handleRegister} className="space-y-4">
                   <div>
                     <label htmlFor="transactionId" className="block text-sm font-medium text-gray-400 mb-1">
-                      Transaction ID
+                      Transaction ID *
                     </label>
                     <input
                       type="text"
@@ -278,16 +298,70 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
                       onChange={(e) => setTransactionId(e.target.value)}
                       className="w-full p-2 bg-dark-300 border border-dark-100 rounded-md text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
                       placeholder="Enter your transaction ID"
+                      required
                     />
-                    {errorMessage && (
-                      <p className="mt-1 text-red-500 text-sm">{errorMessage}</p>
-                    )}
                   </div>
+
+                  <div>
+                    <label htmlFor="referalId" className="block text-sm font-medium text-gray-400 mb-1">
+                      Referral ID (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      id="referalId"
+                      value={referalId}
+                      onChange={(e) => setReferalId(e.target.value)}
+                      className="w-full p-2 bg-dark-300 border border-dark-100 rounded-md text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      placeholder="Enter referral ID (if any)"
+                    />
+                  </div>
+
+                  {/* Terms and Conditions Checkbox */}
+                  <div className="flex items-start space-x-3">
+                    <input
+                      type="checkbox"
+                      id="acceptTerms"
+                      checked={acceptedTerms}
+                      onChange={(e) => setAcceptedTerms(e.target.checked)}
+                      className="mt-1 w-4 h-4 text-primary-600 bg-dark-300 border-dark-100 rounded focus:ring-primary-500 focus:ring-2"
+                    />
+                    <label htmlFor="acceptTerms" className="text-sm text-gray-300">
+                      I accept the{' '}
+                      <button
+                        type="button"
+                        className="text-primary-400 hover:text-primary-300 underline"
+                        onClick={() => {
+                          // You can implement a modal or redirect to terms page here
+                          alert('Terms and conditions would open here');
+                        }}
+                      >
+                        terms and conditions
+                      </button>
+                      {' '}and{' '}
+                      <button
+                        type="button"
+                        className="text-primary-400 hover:text-primary-300 underline"
+                        onClick={() => {
+                          // You can implement a modal or redirect to privacy policy page here
+                          alert('Privacy policy would open here');
+                        }}
+                      >
+                        privacy policy
+                      </button>
+                      <span className="text-red-400 ml-1">*</span>
+                    </label>
+                  </div>
+                  
+                  {errorMessage && (
+                    <div className="p-3 bg-red-900/20 border border-red-500/30 rounded-md">
+                      <p className="text-red-400 text-sm">{errorMessage}</p>
+                    </div>
+                  )}
                   
                   <button
                     type="submit"
-                    disabled={isSubmitting}
-                    className="w-full py-2 px-4 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-md transition duration-200 disabled:opacity-50"
+                    disabled={isSubmitting || !transactionId.trim() || !acceptedTerms}
+                    className="w-full py-2 px-4 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-md transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSubmitting ? 'Submitting...' : 'Register for Course'}
                   </button>
@@ -297,7 +371,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
               <div className="flex-1 flex justify-center items-center">
                 <div className="bg-white p-4 rounded-lg">
                   <QrCode size={150} className="text-dark-300" />
-                  <p className="text-dark-300 text-center mt-2 text-sm">Scan to pay</p>
+                  <p className="text-dark-300 text-center mt-2 text-sm">Scan to pay ₹{course.price}</p>
                 </div>
               </div>
             </div>
@@ -338,7 +412,16 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
         <p className="text-gray-300">{course.description}</p>
       </div>
       
-      {renderContent()}
+      {/* Show loading state while checking registration status */}
+      {isCheckingStatus ? (
+        <div className="bg-dark-200 p-6 rounded-lg text-center">
+          <div className="text-primary-400 text-4xl mb-4">⏳</div>
+          <h3 className="text-lg font-semibold text-primary-400 mb-2">Checking Registration Status</h3>
+          <p className="text-gray-400">Please wait while we verify your access...</p>
+        </div>
+      ) : (
+        renderContent()
+      )}
     </div>
   );
 };
