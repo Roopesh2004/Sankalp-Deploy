@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, BookOpen, Clock, Award, QrCode, Play } from 'lucide-react';
+import { ArrowLeft, BookOpen, Clock, Award, QrCode, Play, X, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface Material {
@@ -13,8 +13,17 @@ interface Module {
   title: string;
   description?: string;
   day: number;
+  week: number;
   videoUrl?: string;
   materials: string[];
+}
+
+interface Week {
+  weekNumber: number;
+  title: string;
+  description?: string;
+  modules: Module[];
+  isAccessible: boolean;
 }
 
 interface CourseDetailsProps {
@@ -22,7 +31,9 @@ interface CourseDetailsProps {
     id: number;
     title: string;
     description: string;
+    thumbnail:string,
     duration: string;
+    syllabus:string,
     level: string;
     price: number;
     image?: string;
@@ -35,10 +46,10 @@ interface CourseDetailsProps {
 
 const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, name }) => {
   const { user } = useAuth();
-  const [activeModule, setActiveModule] = useState<number | null>(null);
+  const [activeWeek, setActiveWeek] = useState<number | null>(null);
+  const [activeDay, setActiveDay] = useState<number | null>(null);
   const [transactionId, setTransactionId] = useState('');
   const [referalId, setReferalId] = useState('');
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [registrationStatus, setRegistrationStatus] = useState<'not_registered' | 'pending' | 'approved' | null>(null);
   const [isCheckingStatus, setIsCheckingStatus] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,8 +57,49 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
   const [selectedVideo, setSelectedVideo] = useState<number | null>(null);
   const [videoToken, setVideoToken] = useState<string | null>(null);
   const [isLoadingVideo, setIsLoadingVideo] = useState(false);
+  const [grantedDate, setGrantedDate] = useState<number>(0);
+  
+  // New states for terms and conditions modal
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [pendingRegistrationData, setPendingRegistrationData] = useState<any>(null);
+  const [isConfirmingRegistration, setIsConfirmingRegistration] = useState(false);
 
-  // Function to get video token
+  // Function to calculate accessible weeks based on days passed
+  const calculateAccessibleWeeks = (daysPassed: number): number => {
+    // Week 1 is accessible from day 0 (immediately)
+    // Week 2 is accessible from day 7 (after 1 week)
+    // Week 3 is accessible from day 14 (after 2 weeks)
+    // And so on...
+    return Math.floor(daysPassed / 7) + 1;
+  };
+
+  // Function to group modules by week with accessibility check
+  const groupModulesByWeek = (modules: Module[], daysPassed: number): Week[] => {
+    const weekMap = new Map<number, Module[]>();
+    const accessibleWeeks = calculateAccessibleWeeks(daysPassed);
+    
+    modules.forEach(module => {
+      const weekNumber = module.week;
+      if (!weekMap.has(weekNumber)) {
+        weekMap.set(weekNumber, []);
+      }
+      weekMap.get(weekNumber)!.push(module);
+    });
+    
+    const weeks: Week[] = [];
+    weekMap.forEach((modules, weekNumber) => {
+      weeks.push({
+        weekNumber,
+        title: `Week ${weekNumber}`,
+        description: `Week ${weekNumber} content and materials`,
+        modules: modules.sort((a, b) => a.day - b.day),
+        isAccessible: weekNumber <= accessibleWeeks
+      });
+    });
+    
+    return weeks.sort((a, b) => a.weekNumber - b.weekNumber);
+  };
+
   const getVideoToken = async (moduleId: number) => {
     if (!email) return null;
     
@@ -73,6 +125,14 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
     }
   };
 
+
+  const openSyllabus = (driveLink) => {
+  window.open(driveLink, '_blank');
+};
+
+  const openMaterial = (driveLink) => {
+  window.open(driveLink, '_blank');
+};
   // Update the video selection handler to open the video directly
   const handleVideoSelect = async (moduleId: number) => {
     setSelectedVideo(moduleId);
@@ -113,14 +173,15 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
         });
         
         const pendingData = await pendingResponse.json();
+
+        console.log("Pending data: ", pendingData)
         
-        if (pendingData.value === 1) {
-          setRegistrationStatus('approved');
-          setIsCheckingStatus(false);
-          return;
-        } else if (pendingData.value === 0) {
+        if (pendingData.value === 0) {
           setRegistrationStatus('pending');
           setIsCheckingStatus(false);
+          return;
+        } else if(pendingData.value === -1) {
+          setRegistrationStatus('not_registered');
           return;
         }
         
@@ -135,6 +196,9 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
         
         if (accessData.hasAccess) {
           setRegistrationStatus('approved');
+          const diffInMs = new Date().getTime() - new Date(accessData.grantedDate).getTime();
+          const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+          setGrantedDate(diffInDays);
         } else {
           setRegistrationStatus('not_registered');
         }
@@ -149,7 +213,8 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
     checkRegistrationStatus();
   }, [email, course.id]);
 
-  const handleRegister = async (e: React.FormEvent) => {
+  // First step: Save transaction and referral IDs, then show terms modal
+  const handleInitialRegistration = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!transactionId.trim()) {
@@ -157,27 +222,47 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
       return;
     }
     
-    if (!acceptedTerms) {
-      setErrorMessage('Please accept the terms and conditions to proceed');
-      return;
-    }
-    
     setIsSubmitting(true);
+    setErrorMessage('');
+    
+    try {
+      // Save the registration data temporarily
+      const registrationData = {
+        name: name || user?.name || 'Unknown User',
+        email: email,
+        transid: transactionId,
+        refid: referalId,
+        courseName: course.title,
+        amt: course.price,
+        courseId: course.id
+      };
+      
+      // Store the data for later use
+      setPendingRegistrationData(registrationData);
+      
+      // Show terms and conditions modal
+      setShowTermsModal(true);
+      
+    } catch (error) {
+      console.error('Registration error:', error);
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to process registration. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Final step: Confirm registration after accepting terms
+  const handleConfirmRegistration = async () => {
+    if (!pendingRegistrationData) return;
+    
+    setIsConfirmingRegistration(true);
     setErrorMessage('');
     
     try {
       const response = await fetch('https://sankalp-deploy-1.onrender.com/api/pending', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: name || user?.name || 'Unknown User',
-          email: email,
-          transid: transactionId,
-          refid: referalId,
-          courseName: course.title,
-          amt: course.price,
-          courseId: course.id
-        }),
+        body: JSON.stringify(pendingRegistrationData),
       });
       
       const data = await response.json();
@@ -187,73 +272,244 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
       }
       
       setRegistrationStatus('pending');
+      setShowTermsModal(false);
+      setPendingRegistrationData(null);
     } catch (error) {
       console.error('Registration error:', error);
       setErrorMessage(error instanceof Error ? error.message : 'Failed to register for the course. Please try again.');
     } finally {
-      setIsSubmitting(false);
+      setIsConfirmingRegistration(false);
     }
   };
+
+  // Terms and Conditions Modal Component
+  const TermsModal = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-dark-100 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+        <div className="flex justify-between items-center p-6 border-b border-dark-200">
+          <h3 className="text-xl font-semibold text-primary-400">Terms and Conditions</h3>
+          <button
+            onClick={() => {
+              setShowTermsModal(false);
+              setPendingRegistrationData(null);
+            }}
+            className="text-gray-400 hover:text-white"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="text-gray-300 space-y-4">
+            <h4 className="text-lg font-medium text-primary-400">Course Registration Terms</h4>
+            <p>
+              By registering for this course, you agree to the following terms and conditions:
+            </p>
+            
+            <div className="space-y-3">
+              <div>
+                <h5 className="font-medium text-gray-200">1. Payment and Refunds</h5>
+                <p className="text-sm">
+                  All payments are final. Refunds will only be processed in exceptional circumstances 
+                  and at the sole discretion of the course provider.
+                </p>
+              </div>
+              
+              <div>
+                <h5 className="font-medium text-gray-200">2. Course Access</h5>
+                <p className="text-sm">
+                  Access to course materials will be granted upon verification of payment. 
+                  Course access is non-transferable and limited to the registered user only.
+                </p>
+              </div>
+              
+              <div>
+                <h5 className="font-medium text-gray-200">3. Intellectual Property</h5>
+                <p className="text-sm">
+                  All course materials are protected by copyright. Sharing, copying, or 
+                  distributing course content is strictly prohibited.
+                </p>
+              </div>
+              
+              <div>
+                <h5 className="font-medium text-gray-200">4. User Conduct</h5>
+                <p className="text-sm">
+                  Users must maintain professional conduct and respect towards instructors 
+                  and fellow students throughout the course duration.
+                </p>
+              </div>
+              
+              <div>
+                <h5 className="font-medium text-gray-200">5. Privacy Policy</h5>
+                <p className="text-sm">
+                  Your personal information will be used solely for course administration 
+                  and will not be shared with third parties without your explicit consent.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="p-6 border-t border-dark-200">
+          {errorMessage && (
+            <div className="p-3 bg-red-900/20 border border-red-500/30 rounded-md mb-4">
+              <p className="text-red-400 text-sm">{errorMessage}</p>
+            </div>
+          )}
+          
+          <div className="flex gap-3">
+            <button
+              onClick={() => {
+                setShowTermsModal(false);
+                setPendingRegistrationData(null);
+              }}
+              className="flex-1 py-2 px-4 border border-gray-600 text-gray-300 rounded-md hover:bg-dark-200 transition duration-200"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleConfirmRegistration}
+              disabled={isConfirmingRegistration}
+              className="flex-1 py-2 px-4 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-md transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isConfirmingRegistration ? 'Confirming...' : 'Accept and Register'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   // Render different content based on registration status
   const renderContent = () => {
     switch (registrationStatus) {
       case 'approved':
+        const weeks = groupModulesByWeek(course.modules, grantedDate);
+        const accessibleWeeks = calculateAccessibleWeeks(grantedDate);
+        
         return (
           <div className="space-y-6">
-            <h3 className="text-xl font-semibold text-primary-400">Course Modules</h3>
+            <div className="flex justify-between items-center">
+              <h3 className="text-xl font-semibold text-primary-400">Course Content</h3>
+              <div className="text-sm text-gray-400">
+                {grantedDate === 0 ? (
+                  <span>Course started today • Week {accessibleWeeks} available</span>
+                ) : (
+                  <span>Week {accessibleWeeks} available</span>
+                )}
+              </div>
+            </div>
+            
             <div className="space-y-4">
-              {course.modules.map((module) => (
-                <div key={module.id} className="bg-dark-200 rounded-lg overflow-hidden">
+              {weeks.map((week) => (
+                <div key={week.weekNumber} className={`rounded-lg overflow-hidden ${
+                  week.isAccessible 
+                    ? 'bg-dark-200' 
+                    : 'bg-dark-200 opacity-60'
+                }`}>
+                  {/* Week Header */}
                   <motion.button
-                    whileHover={{ backgroundColor: 'rgba(124, 58, 237, 0.1)' }}
-                    onClick={() => setActiveModule(activeModule === module.id ? null : module.id)}
-                    className="w-full p-4 flex justify-between items-center text-left"
+                    whileHover={week.isAccessible ? { backgroundColor: 'rgba(124, 58, 237, 0.1)' } : {}}
+                    onClick={() => week.isAccessible && setActiveWeek(activeWeek === week.weekNumber ? null : week.weekNumber)}
+                    className={`w-full p-4 flex justify-between items-center text-left border-b border-dark-100 ${
+                      !week.isAccessible ? 'cursor-not-allowed' : ''
+                    }`}
+                    disabled={!week.isAccessible}
                   >
                     <div>
                       <div className="flex items-center">
-                        <span className="text-primary-400 font-medium">Day {module.day}:</span>
-                        <h4 className="ml-2 font-semibold text-gray-200">{module.title}</h4>
+                        <h4 className={`font-semibold text-lg ${
+                          week.isAccessible ? 'text-primary-400' : 'text-gray-500'
+                        }`}>
+                          {week.title}
+                        </h4>
+                        {!week.isAccessible && (
+                          <Lock className="w-4 h-4 ml-2 text-gray-500" />
+                        )}
                       </div>
-                      <p className="text-sm text-gray-400 mt-1">{module.description}</p>
+                      <p className="text-sm text-gray-400 mt-1">
+                        {week.isAccessible ? week.description : `Unlocks on day ${(week.weekNumber - 1) * 7 + 1}`}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">{week.modules.length} days</p>
                     </div>
-                    <div className="text-primary-400">
-                      {activeModule === module.id ? '−' : '+'}
+                    <div className={`text-xl ${week.isAccessible ? 'text-primary-400' : 'text-gray-500'}`}>
+                      {week.isAccessible ? (activeWeek === week.weekNumber ? '−' : '+') : '🔒'}
                     </div>
                   </motion.button>
                   
-                  {activeModule === module.id && (
+                  {/* Days within Week - Only show if week is accessible and expanded */}
+                  {week.isAccessible && activeWeek === week.weekNumber && (
                     <motion.div
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      className="px-4 pb-4"
+                      className="bg-dark-300"
                     >
-                      <div className="mb-4">
-                        <button
-                          onClick={() => handleVideoSelect(module.id)}
-                          className="flex items-center space-x-2 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md transition duration-200"
-                          disabled={isLoadingVideo}
-                        >
-                          <Play className="w-4 h-4" />
-                          <span>{isLoadingVideo ? 'Loading...' : 'Watch Video'}</span>
-                        </button>
-                      </div>
-                      
-                      <h5 className="text-sm font-medium text-primary-400 mb-2">Materials:</h5>
-                      <ul className="space-y-2 text-gray-300">
-                        {module.materials && module.materials.length > 0 ? (
-                          module.materials.map((material, index) => (
-                            <li key={index} className="bg-dark-300 p-3 rounded">
-                              {material}
-                            </li>
-                          ))
-                        ) : (
-                          <li className="bg-dark-300 p-3 rounded text-gray-400">
-                            No materials available for this module.
-                          </li>
-                        )}
-                      </ul>
+                      {week.modules.map((module) => (
+                        <div key={module.id} className="border-b border-dark-100 last:border-b-0">
+                          {/* Day Header */}
+                          <motion.button
+                            whileHover={{ backgroundColor: 'rgba(124, 58, 237, 0.05)' }}
+                            onClick={() => setActiveDay(activeDay === module.id ? null : module.id)}
+                            className="w-full p-4 flex justify-between items-center text-left"
+                          >
+                            <div>
+                              <div className="flex items-center">
+                                <span className="text-primary-300 font-medium">Day {module.day}:</span>
+                                <h5 className="ml-2 font-medium text-gray-200">{module.title}</h5>
+                              </div>
+                              <p className="text-sm text-gray-400 mt-1">{module.description}</p>
+                            </div>
+                            <div className="text-primary-300">
+                              {activeDay === module.id ? '−' : '+'}
+                            </div>
+                          </motion.button>
+                          
+                          {/* Day Content - Video and Materials */}
+                          {activeDay === module.id && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              className="px-4 pb-4 bg-dark-400"
+                            >
+                              {/* Video Section */}
+                              <div className="mb-4 p-3 bg-dark-200 rounded-lg">
+                                <h6 className="text-sm font-medium text-primary-400 mb-2">Video Lecture:</h6>
+                                <button
+                                  onClick={() => handleVideoSelect(module.id)}
+                                  className="flex items-center space-x-2 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md transition duration-200"
+                                  disabled={isLoadingVideo}
+                                >
+                                  <Play className="w-4 h-4" />
+                                  <span>{isLoadingVideo && selectedVideo === module.id ? 'Loading...' : 'Watch Video'}</span>
+                                </button>
+                              </div>
+                              
+                              {/* Materials Section */}
+                              <div className="p-3 bg-dark-200 rounded-lg">
+                                <h6 className="text-sm font-medium text-primary-400 mb-2">Course Materials:</h6>
+                                <ul className="space-y-2 text-gray-300">
+                                  {module.materials && module.materials.length > 0 ? (
+                                    module.materials.map((material, index) => (
+                                      <li key={index} className="bg-dark-300 p-3 rounded-md text-sm">
+                                        <div className="flex items-start">
+                                          <BookOpen className="w-4 h-4 mr-2 mt-0.5 text-primary-400 flex-shrink-0" />
+                                          <span onClick={()=>openMaterial(material)} style={{ cursor: 'pointer' }}>Material {index+1}</span>
+                                        </div>
+                                      </li>
+                                    ))
+                                  ) : (
+                                    <li className="bg-dark-300 p-3 rounded-md text-gray-400 text-sm">
+                                      No materials available for this day.
+                                    </li>
+                                  )}
+                                </ul>
+                              </div>
+                            </motion.div>
+                          )}
+                        </div>
+                      ))}
                     </motion.div>
                   )}
                 </div>
@@ -286,7 +542,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
                   To access this course, please make a payment using the QR code and enter your transaction ID below.
                 </p>
                 
-                <form onSubmit={handleRegister} className="space-y-4">
+                <form onSubmit={handleInitialRegistration} className="space-y-4">
                   <div>
                     <label htmlFor="transactionId" className="block text-sm font-medium text-gray-400 mb-1">
                       Transaction ID *
@@ -315,42 +571,6 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
                       placeholder="Enter referral ID (if any)"
                     />
                   </div>
-
-                  {/* Terms and Conditions Checkbox */}
-                  <div className="flex items-start space-x-3">
-                    <input
-                      type="checkbox"
-                      id="acceptTerms"
-                      checked={acceptedTerms}
-                      onChange={(e) => setAcceptedTerms(e.target.checked)}
-                      className="mt-1 w-4 h-4 text-primary-600 bg-dark-300 border-dark-100 rounded focus:ring-primary-500 focus:ring-2"
-                    />
-                    <label htmlFor="acceptTerms" className="text-sm text-gray-300">
-                      I accept the{' '}
-                      <button
-                        type="button"
-                        className="text-primary-400 hover:text-primary-300 underline"
-                        onClick={() => {
-                          // You can implement a modal or redirect to terms page here
-                          alert('Terms and conditions would open here');
-                        }}
-                      >
-                        terms and conditions
-                      </button>
-                      {' '}and{' '}
-                      <button
-                        type="button"
-                        className="text-primary-400 hover:text-primary-300 underline"
-                        onClick={() => {
-                          // You can implement a modal or redirect to privacy policy page here
-                          alert('Privacy policy would open here');
-                        }}
-                      >
-                        privacy policy
-                      </button>
-                      <span className="text-red-400 ml-1">*</span>
-                    </label>
-                  </div>
                   
                   {errorMessage && (
                     <div className="p-3 bg-red-900/20 border border-red-500/30 rounded-md">
@@ -360,10 +580,10 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
                   
                   <button
                     type="submit"
-                    disabled={isSubmitting || !transactionId.trim() || !acceptedTerms}
+                    disabled={isSubmitting || !transactionId.trim()}
                     className="w-full py-2 px-4 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-md transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isSubmitting ? 'Submitting...' : 'Register for Course'}
+                    {isSubmitting ? 'Processing...' : 'Continue to Terms & Conditions'}
                   </button>
                 </form>
               </div>
@@ -381,48 +601,69 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={onBack}
-          className="mr-4 p-2 rounded-full bg-dark-200 text-primary-400"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </motion.button>
-        <h2 className="text-2xl font-bold text-primary-400">{course.title}</h2>
+    <>
+      <div className="space-y-6">
+        <div className="flex items-center">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onBack}
+            className="mr-4 p-2 rounded-full bg-dark-200 text-primary-400"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </motion.button>
+          <h2 className="text-2xl font-bold text-primary-400">{course.title}</h2>
+        </div>
+        <img className='w-full h-[30vh] object-cover rounded-lg' src={course.thumbnail}></img>
+        <div className="flex flex-row justify-between items-start gap-4 bg-dark-200">
+          {/* Left content: course tile and description */}
+          <div className="flex-1 bg-dark-200 p-4 rounded-lg">
+            <div className="flex flex-wrap gap-4 mb-4">
+              <div className="flex items-center text-gray-400">
+                <Clock className="w-4 h-4 mr-2" />
+                <span>{course.duration}</span>
+              </div>
+              <div className="flex items-center text-gray-400">
+                <Award className="w-4 h-4 mr-2" />
+                <span>{course.level}</span>
+              </div>
+              <div className="flex items-center text-gray-400">
+                <BookOpen className="w-4 h-4 mr-2" />
+                <span>{course.modules.length} Days</span>
+              </div>
+            </div>
+            <p className="text-gray-300">{course.description}</p>
+          </div>
+
+          {/* Right content: button */}
+          {
+            registrationStatus==="approved" &&
+            <div className="flex-shrink-0 p-4 my-auto">
+            <button
+              onClick={()=>openSyllabus(course.syllabus)}
+              className="py-2 px-4 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-md transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Download Syllabus
+            </button>
+          </div>
+          }
+        </div>
+        
+        {/* Show loading state while checking registration status */}
+        {isCheckingStatus ? (
+          <div className="bg-dark-200 p-6 rounded-lg text-center">
+            <div className="text-primary-400 text-4xl mb-4">⏳</div>
+            <h3 className="text-lg font-semibold text-primary-400 mb-2">Checking Registration Status</h3>
+            <p className="text-gray-400">Please wait while we verify your access...</p>
+          </div>
+        ) : (
+          renderContent()
+        )}
       </div>
       
-      <div className="bg-dark-200 p-4 rounded-lg">
-        <div className="flex flex-wrap gap-4 mb-4">
-          <div className="flex items-center text-gray-400">
-            <Clock className="w-4 h-4 mr-2" />
-            <span>{course.duration}</span>
-          </div>
-          <div className="flex items-center text-gray-400">
-            <Award className="w-4 h-4 mr-2" />
-            <span>{course.level}</span>
-          </div>
-          <div className="flex items-center text-gray-400">
-            <BookOpen className="w-4 h-4 mr-2" />
-            <span>{course.modules.length} Modules</span>
-          </div>
-        </div>
-        <p className="text-gray-300">{course.description}</p>
-      </div>
-      
-      {/* Show loading state while checking registration status */}
-      {isCheckingStatus ? (
-        <div className="bg-dark-200 p-6 rounded-lg text-center">
-          <div className="text-primary-400 text-4xl mb-4">⏳</div>
-          <h3 className="text-lg font-semibold text-primary-400 mb-2">Checking Registration Status</h3>
-          <p className="text-gray-400">Please wait while we verify your access...</p>
-        </div>
-      ) : (
-        renderContent()
-      )}
-    </div>
+      {/* Terms and Conditions Modal */}
+      {showTermsModal && <TermsModal />}
+    </>
   );
 };
 

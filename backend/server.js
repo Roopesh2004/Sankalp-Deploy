@@ -517,9 +517,10 @@ app.post('/api/check-course-access', async (req, res) => {
     );
     
     connection.release();
-    
+    console.log(accessRecords)
     return res.json({
-      hasAccess: accessRecords.length > 0
+      hasAccess: accessRecords.length > 0,
+      grantedDate:accessRecords[0].accessGranted
     });
     
   } catch (error) {
@@ -943,10 +944,10 @@ app.post('/api/generate-video-token', async (req, res) => {
 // Add course with modules and materials
 app.post('/api/courses', async (req, res) => {
   try {
-    const { title, description, thumbnail, modules } = req.body;
+    const { title, description, thumbnail, syllabus, weeks, modules } = req.body;
     
     // Validate input
-    if (!title || !description || !modules || !Array.isArray(modules)) {
+    if (!title || !description || !modules || !Array.isArray(modules) || !weeks || !Array.isArray(weeks)) {
       return res.status(400).json({ message: 'Invalid course data' });
     }
     
@@ -958,21 +959,22 @@ app.post('/api/courses', async (req, res) => {
     try {
       // Insert course
       const [courseResult] = await connection.execute(
-        'INSERT INTO courses (title, description, thumbnail) VALUES (?, ?, ?)',
-        [title, description, thumbnail || '']
+        'INSERT INTO courses (title, description, thumbnail, syllabus) VALUES (?, ?, ?, ?)',
+        [title, description, thumbnail || '', syllabus || '']
       );
       
       const courseId = courseResult.insertId;
       
       // Insert modules and materials
+
       for (const module of modules) {
-        if (!module.title || !module.day || !module.videoUrl) {
+        if (!module.title || !module.day || !module.videoUrl || !module.week) {
           throw new Error('Invalid module data');
         }
         
         const [moduleResult] = await connection.execute(
-          'INSERT INTO course_modules (courseId, title, day, videoUrl) VALUES (?, ?, ?, ?)',
-          [courseId, module.title, module.day, module.videoUrl]
+          'INSERT INTO course_modules (courseId, title, week, day, videoUrl) VALUES (?, ?, ?, ?, ?)',
+          [courseId, module.title, module.week, module.day, module.videoUrl]
         );
         
         const moduleId = moduleResult.insertId;
