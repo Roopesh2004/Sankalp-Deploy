@@ -1,16 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useAnimation, Variants } from 'framer-motion';
-import { 
-  Brain, 
-  Code, 
-  Database, 
-  Smartphone, 
-  Cloud, 
-  GitBranch, 
-  BarChart3, 
-  Globe,
-  Cpu
-} from 'lucide-react';
 import * as THREE from 'three';
 
 const Services = () => {
@@ -136,75 +125,57 @@ const Services = () => {
     }
   };
 
-  // Services data with background images instead of gradients
+  // Services data with background images from public folder
   const services = [
     {
-      
-      description: "Complete App Development program covering mobile app development for iOS and Android platforms using modern frameworks like React Native, Flutter, and native development.",
       backgroundImage: "/appdev.png",
       color: "from-green-600 to-green-800",
       highlight: "green",
       link: "/getstarted"
     },
     {
-      
-      description: "Master cloud technologies including AWS, Azure, Google Cloud Platform. Learn cloud architecture, deployment strategies, serverless computing, and cloud security practices.",
       backgroundImage: "/cc.png",
       color: "from-purple-600 to-purple-800",
       highlight: "purple",
       link: "/getstarted"
     },
     {
-      
-      description: "Competitive Programming mastery course focusing on algorithms, data structures, problem-solving techniques, and contest strategies for coding competitions and technical interviews.",
       backgroundImage: "/cp.jpg",
       color: "from-red-600 to-red-800",
       highlight: "red",
       link: "/getstarted"
     },
     {
-      
-      description: "Comprehensive data analytics program covering statistical analysis, data visualization, Python/R programming, SQL, and business intelligence tools for data-driven decision making.",
       backgroundImage: "/da.jpg",
       color: "from-yellow-600 to-yellow-800",
       highlight: "yellow",
       link: "/getstarted"
     },
     {
-      
-      description: "Advanced deep learning course covering neural networks, CNNs, RNNs, transformers, and cutting-edge architectures. Hands-on experience with TensorFlow and PyTorch frameworks.",
       backgroundImage: "/dl.jpg",
       color: "from-indigo-600 to-indigo-800",
       highlight: "indigo",
       link: "/getstarted"
     },
     {
-     
-      description: "Complete DevOps engineering course covering CI/CD pipelines, containerization with Docker, Kubernetes orchestration, infrastructure as code, and cloud deployment strategies.",
       backgroundImage: "/devops.jpg",
       color: "from-teal-600 to-teal-800",
       highlight: "teal",
       link: "/getstarted"
     },
     {
-      
-      description: "Cutting-edge Generative AI course covering large language models, prompt engineering, fine-tuning techniques, and building AI-powered applications with modern frameworks.",
       backgroundImage: "/genai.jpg",
       color: "from-pink-600 to-pink-800",
       highlight: "pink",
       link: "/getstarted"
     },
     {
-      
-      description: "Comprehensive machine learning program covering supervised and unsupervised learning, feature engineering, model evaluation, and deployment of ML models in production environments.",
       backgroundImage: "/ml.jpg",
       color: "from-cyan-600 to-cyan-800",
       highlight: "cyan",
       link: "/getstarted"
     },
     {
-      
-      description: "Full-stack web development course covering HTML, CSS, JavaScript, React, Node.js, databases, and modern web development practices for building scalable web applications.",
       backgroundImage: "/webdev.jpg",
       color: "from-orange-600 to-orange-800",
       highlight: "orange",
@@ -253,9 +224,6 @@ const Services = () => {
           {services.map((service, index) => (
             <ServiceCard
               key={index}
-              icon={service.icon}
-              title={service.title}
-              description={service.description}
               backgroundImage={service.backgroundImage}
               color={service.color}
               highlight={service.highlight}
@@ -270,9 +238,6 @@ const Services = () => {
 };
 
 interface ServiceCardProps { 
-  icon: React.ReactNode; 
-  title: string; 
-  description: string;
   backgroundImage: string;
   color: string;
   highlight: string;
@@ -281,9 +246,6 @@ interface ServiceCardProps {
 }
 
 const ServiceCard = ({ 
-  icon, 
-  title, 
-  description,
   backgroundImage,
   color,
   highlight,
@@ -322,20 +284,6 @@ const ServiceCard = ({
     }
   };
 
-  const iconVariants: Variants = {
-    initial: { scale: 1, rotate: 0 },
-    hover: { 
-      scale: 1.2, 
-      rotate: [0, -10, 10, -5, 5, 0],
-      transition: { 
-        duration: 0.6,
-        type: "spring",
-        stiffness: 300, 
-        damping: 10 
-      }
-    }
-  };
-
   const glowVariants: Variants = {
     initial: { opacity: 0 },
     hover: { 
@@ -357,7 +305,7 @@ const ServiceCard = ({
       variants={cardVariants}
       initial="hidden"
       animate={controls}
-      className="bg-dark-300/80 backdrop-blur-sm rounded-xl overflow-hidden transition-all duration-300 border border-dark-400 relative cursor-pointer"
+      className="bg-dark-300/80 backdrop-blur-sm rounded-xl overflow-hidden transition-all duration-300 border border-dark-400 relative cursor-pointer aspect-[4/3]"
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
       onClick={onClick}
@@ -384,17 +332,20 @@ const ServiceCard = ({
         }}
       />
 
-      {/* Card header with background image instead of gradient */}
-      <div 
-        className="p-6 relative overflow-hidden"
-        style={{
-          backgroundImage: `linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 100%), url(${backgroundImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      >
-        {/* Animated particles in the card header */}
+      {/* Full card image */}
+      <div className="absolute inset-0 relative overflow-hidden">
+        <img 
+          src={backgroundImage}
+          alt="Course"
+          className="w-full h-full object-cover"
+        />
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 100%)'
+          }}
+        />
+        {/* Animated particles in the card */}
         {isHovered && (
           <motion.div 
             className="absolute inset-0 opacity-60"
@@ -429,55 +380,6 @@ const ServiceCard = ({
               />
             ))}
           </motion.div>
-        )}
-
-        <motion.div 
-          className="bg-white/20 p-3 rounded-lg inline-block mb-4 relative backdrop-blur-sm"
-          variants={iconVariants}
-          initial="initial"
-          animate={isHovered ? "hover" : "initial"}
-        >
-          {icon}
-          
-          {/* Icon glow effect */}
-          <motion.div 
-            className="absolute inset-0 bg-white blur-md rounded-lg"
-            initial={{ opacity: 0 }}
-            animate={isHovered ? { opacity: 0.5 } : { opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          />
-        </motion.div>
-        
-        <motion.h3 
-          className="text-xl font-bold text-white mb-2 relative"
-          animate={isHovered ? { 
-            textShadow: "0 0 8px rgba(255,255,255,0.5)",
-            x: [0, -2, 3, -3, 2, 0],
-            transition: { x: { duration: 0.4 } }
-          } : {}}
-        >
-          {title}
-        </motion.h3>
-      </div>
-      
-      
-      <div className="p-6 relative overflow-hidden">
-        <motion.p 
-          className="text-gray-300 relative z-10"
-          animate={isHovered ? { color: "#ffffff" } : {}}
-          transition={{ duration: 0.3 }}
-        >
-          {description}
-        </motion.p>
-        
-        {/* Content background effect */}
-        {isHovered && (
-          <motion.div 
-            className="absolute inset-0 bg-gradient-to-b from-dark-500/0 to-dark-500/50"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          />
         )}
       </div>
       

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Zap, Mail, Phone, MapPin, Instagram, Linkedin, ArrowRight, Youtube } from 'lucide-react';
+import { Mail, Phone, MapPin, Instagram, Linkedin, ArrowRight, Youtube } from 'lucide-react';
 import * as THREE from 'three';
 
 const Footer = () => {
@@ -237,7 +237,7 @@ const Footer = () => {
                   repeatType: "reverse"
                 }}
               >
-                <Zap className="h-8 w-8 text-primary-400" />
+                <img src="/logo.png" alt="Sankalp Logo" className="h-8 w-8" />
               </motion.div>
               <motion.span
                 className="text-2xl font-bold font-display"
@@ -453,34 +453,20 @@ const Footer = () => {
               <motion.img
                 src="/mascot.png"
                 alt="SpectoV Mascot"
-                className="w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 object-contain rounded-2xl shadow-2xl"
+                className="w-48 h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 xl:w-72 xl:h-72 object-contain"
                 animate={{
-                  y: [0, -10, 0],
-                  boxShadow: [
-                    "0 10px 30px rgba(124, 58, 237, 0.2)",
-                    "0 20px 40px rgba(124, 58, 237, 0.4)",
-                    "0 10px 30px rgba(124, 58, 237, 0.2)"
-                  ]
+                  y: [0, -15, 0],
+                  rotate: [0, 3, -3, 0],
+                  scale: [1, 1.02, 1]
                 }}
                 transition={{
-                  duration: 4,
+                  duration: 6,
                   repeat: Infinity,
                   repeatType: "reverse",
                   ease: "easeInOut"
                 }}
-              />
-              
-              {/* Glowing ring around mascot */}
-              <motion.div
-                className="absolute inset-0 rounded-2xl border-2 border-primary-400/30"
-                animate={{
-                  scale: [1, 1.1, 1],
-                  opacity: [0.3, 0.6, 0.3],
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  repeatType: "reverse"
+                style={{
+                  filter: 'drop-shadow(0 10px 30px rgba(124, 58, 237, 0.3))',
                 }}
               />
               
@@ -510,6 +496,35 @@ const Footer = () => {
                   duration: 2,
                   repeat: Infinity,
                   repeatDelay: 0.5
+                }}
+              />
+              
+              {/* Additional sparkle effects */}
+              <motion.div
+                className="absolute top-1/4 -left-3 w-2 h-2 bg-primary-500 rounded-full"
+                animate={{
+                  scale: [0, 1.2, 0],
+                  opacity: [0, 0.9, 0],
+                  x: [0, -5, 0]
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  repeatDelay: 2
+                }}
+              />
+              
+              <motion.div
+                className="absolute bottom-1/3 -right-3 w-2 h-2 bg-primary-300 rounded-full"
+                animate={{
+                  scale: [0, 1.2, 0],
+                  opacity: [0, 0.9, 0],
+                  x: [0, 5, 0]
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  repeatDelay: 1.5
                 }}
               />
             </motion.div>

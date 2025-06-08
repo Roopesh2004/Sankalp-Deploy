@@ -152,7 +152,7 @@ const Founder = () => {
                 Personalized guidance, hands-on training, and placement support is guaranteed. Join Sankalp today, and transform your tech career to achieve professional aspirations. 
               </motion.p>
               <motion.div className="flex items-center relative" variants={itemAnimation} whileHover={{ scale: 1.03 }}>
-                <motion.a href="https://founder.spectov.in/" className="flex items-center" whileHover={{ scale: 1.02 }}>
+                <motion.a href="https://www.linkedin.com/in/founderspectov/" className="flex items-center" whileHover={{ scale: 1.02 }}>
                   <motion.div className="relative mr-4">
                   <motion.div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full blur opacity-70"
                     animate={{ rotate: [0, 360], scale: [0.9, 1.1, 0.9] }}
