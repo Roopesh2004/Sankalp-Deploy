@@ -182,6 +182,7 @@ interface CourseCardProps {
     id: number;
     title: string;
     description: string;
+    thumbnail:string,
     created: string;
     level: string;
     image: string;
@@ -196,7 +197,7 @@ const EnhancedCourseCard: React.FC<CourseCardProps> = ({ course, onClick, index 
   return (
     <motion.div
       variants={itemVariants}
-      className="group relative h-[400px]" // Fixed height for consistent card sizes
+      className="group relative h-[500px]" // Fixed height for consistent card sizes
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
       whileHover={{ 
@@ -240,9 +241,9 @@ const EnhancedCourseCard: React.FC<CourseCardProps> = ({ course, onClick, index 
             <motion.div
               variants={floatingVariants}
               animate="animate"
-              className="p-4 bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-2xl backdrop-blur-lg border border-purple-500/30"
+              className="p-2 bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-2xl backdrop-blur-lg border border-purple-500/30"
             >
-              <BookOpen className="w-8 h-8 text-purple-400" />
+              <img src={course.thumbnail}></img>
             </motion.div>
           </div>
           
@@ -713,6 +714,7 @@ export const StudentDashboard: React.FC = () => {
                             id: course.id,
                             title: course.title || '',
                             description: course.description || '',
+                            thumbnail:course.thumbnail || '',
                             created: course.created_at || '',
                             level: course.level || '',
                             image: course.thumbnail || ''

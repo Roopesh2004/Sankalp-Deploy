@@ -13,7 +13,7 @@ const routes = createBrowserRouter([
     handle: {
       seo: {
         title: "Sankalp Training Program ",
-        description: "Join Sankalp Training Program  by SpectoV. Global professional training with guaranteed placements in Google, Amazon, Microsoft and top MNCs worldwide. 500+ success stories.",
+        description: "Join Sankalp Training Program by SpectoV. Global professional training with guaranteed placements in Google, Amazon, Microsoft and top MNCs worldwide. 500+ success stories.",
         keywords: "sankalp training program, sankalp spectov, spectov internship, sankalp internship, global mnc placements, google jobs, amazon careers, microsoft placements",
         canonical: "/",
         structuredData: {
