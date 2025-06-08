@@ -5,15 +5,24 @@ import { Plus, Trash2, X } from 'lucide-react';
 interface Module {
   title: string;
   day: number;
+  week: number;
   videoUrl: string;
   materials: string[];
+}
+
+interface Week {
+  weekNumber: number;
+  title: string;
+  description: string;
+  modules: Module[];
 }
 
 interface CourseFormData {
   title: string;
   description: string;
   thumbnail: string;
-  modules: Module[];
+  syllabus: string;
+  weeks: Week[];
 }
 
 interface CourseUploadFormProps {
@@ -25,7 +34,13 @@ const CourseUploadForm: React.FC<CourseUploadFormProps> = ({ onClose }) => {
     title: '',
     description: '',
     thumbnail: '',
-    modules: [{ title: '', day: 1, videoUrl: '', materials: [''] }]
+    syllabus: '',
+    weeks: [{
+      weekNumber: 1,
+      title: 'Week 1',
+      description: 'Week 1 content and materials',
+      modules: [{ title: '', day: 1, week: 1, videoUrl: '', materials: [''] }]
+    }]
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,72 +52,168 @@ const CourseUploadForm: React.FC<CourseUploadFormProps> = ({ onClose }) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleModuleChange = (index: number, field: keyof Module, value: string | number) => {
+  const handleWeekChange = (weekIndex: number, field: 'title' | 'description', value: string) => {
     setFormData(prev => {
-      const updatedModules = [...prev.modules];
-      updatedModules[index] = { ...updatedModules[index], [field]: value };
-      return { ...prev, modules: updatedModules };
+      const updatedWeeks = [...prev.weeks];
+      updatedWeeks[weekIndex] = { ...updatedWeeks[weekIndex], [field]: value };
+      return { ...prev, weeks: updatedWeeks };
     });
   };
 
-  const handleMaterialChange = (moduleIndex: number, materialIndex: number, value: string) => {
+  const handleModuleChange = (weekIndex: number, moduleIndex: number, field: keyof Module, value: string | number) => {
     setFormData(prev => {
-      const updatedModules = [...prev.modules];
+      const updatedWeeks = [...prev.weeks];
+      const updatedModules = [...updatedWeeks[weekIndex].modules];
+      updatedModules[moduleIndex] = { ...updatedModules[moduleIndex], [field]: value };
+      updatedWeeks[weekIndex] = { ...updatedWeeks[weekIndex], modules: updatedModules };
+      return { ...prev, weeks: updatedWeeks };
+    });
+  };
+
+  const handleMaterialChange = (weekIndex: number, moduleIndex: number, materialIndex: number, value: string) => {
+    setFormData(prev => {
+      const updatedWeeks = [...prev.weeks];
+      const updatedModules = [...updatedWeeks[weekIndex].modules];
       const updatedMaterials = [...updatedModules[moduleIndex].materials];
       updatedMaterials[materialIndex] = value;
       updatedModules[moduleIndex] = { ...updatedModules[moduleIndex], materials: updatedMaterials };
-      return { ...prev, modules: updatedModules };
+      updatedWeeks[weekIndex] = { ...updatedWeeks[weekIndex], modules: updatedModules };
+      return { ...prev, weeks: updatedWeeks };
     });
   };
 
-  const addModule = () => {
+  const addWeek = () => {
+    const newWeekNumber = formData.weeks.length + 1;
+    const totalDays = formData.weeks.reduce((total, week) => total + week.modules.length, 0);
+    
     setFormData(prev => ({
       ...prev,
-      modules: [...prev.modules, { title: '', day: prev.modules.length + 1, videoUrl: '', materials: [''] }]
+      weeks: [...prev.weeks, {
+        weekNumber: newWeekNumber,
+        title: `Week ${newWeekNumber}`,
+        description: `Week ${newWeekNumber} content and materials`,
+        modules: [{ title: '', day: totalDays + 1, week: newWeekNumber, videoUrl: '', materials: [''] }]
+      }]
     }));
   };
 
-  const removeModule = (index: number) => {
+  const removeWeek = (weekIndex: number) => {
+    if (formData.weeks.length === 1) return; // Don't allow removing the last week
+    
     setFormData(prev => {
-      const updatedModules = prev.modules.filter((_, i) => i !== index);
-      // Update day numbers
-      return { ...prev, modules: updatedModules.map((m, i) => ({ ...m, day: i + 1 })) };
+      const updatedWeeks = prev.weeks.filter((_, i) => i !== weekIndex);
+      // Recalculate week numbers and day numbers
+      let dayCounter = 1;
+      return {
+        ...prev,
+        weeks: updatedWeeks.map((week, i) => ({
+          ...week,
+          weekNumber: i + 1,
+          title: `Week ${i + 1}`,
+          modules: week.modules.map(module => ({
+            ...module,
+            day: dayCounter++,
+            week: i + 1
+          }))
+        }))
+      };
     });
   };
 
-  const addMaterial = (moduleIndex: number) => {
+  const addDay = (weekIndex: number) => {
+    const totalDays = formData.weeks.reduce((total, week, index) => {
+      if (index < weekIndex) return total + week.modules.length;
+      return total;
+    }, 0);
+    
     setFormData(prev => {
-      const updatedModules = [...prev.modules];
+      const updatedWeeks = [...prev.weeks];
+      const newDayNumber = totalDays + updatedWeeks[weekIndex].modules.length + 1;
+      updatedWeeks[weekIndex] = {
+        ...updatedWeeks[weekIndex],
+        modules: [...updatedWeeks[weekIndex].modules, { 
+          title: '', 
+          day: newDayNumber, 
+          week: updatedWeeks[weekIndex].weekNumber, 
+          videoUrl: '', 
+          materials: [''] 
+        }]
+      };
+      return { ...prev, weeks: updatedWeeks };
+    });
+  };
+
+  const removeDay = (weekIndex: number, moduleIndex: number) => {
+    if (formData.weeks[weekIndex].modules.length === 1) return; // Don't allow removing the last day
+    
+    setFormData(prev => {
+      const updatedWeeks = [...prev.weeks];
+      updatedWeeks[weekIndex] = {
+        ...updatedWeeks[weekIndex],
+        modules: updatedWeeks[weekIndex].modules.filter((_, i) => i !== moduleIndex)
+      };
+      
+      // Recalculate all day numbers
+      let dayCounter = 1;
+      updatedWeeks.forEach(week => {
+        week.modules.forEach(module => {
+          module.day = dayCounter++;
+        });
+      });
+      
+      return { ...prev, weeks: updatedWeeks };
+    });
+  };
+
+  const addMaterial = (weekIndex: number, moduleIndex: number) => {
+    setFormData(prev => {
+      const updatedWeeks = [...prev.weeks];
+      const updatedModules = [...updatedWeeks[weekIndex].modules];
       updatedModules[moduleIndex] = {
         ...updatedModules[moduleIndex],
         materials: [...updatedModules[moduleIndex].materials, '']
       };
-      return { ...prev, modules: updatedModules };
+      updatedWeeks[weekIndex] = { ...updatedWeeks[weekIndex], modules: updatedModules };
+      return { ...prev, weeks: updatedWeeks };
     });
   };
 
-  const removeMaterial = (moduleIndex: number, materialIndex: number) => {
+  const removeMaterial = (weekIndex: number, moduleIndex: number, materialIndex: number) => {
     setFormData(prev => {
-      const updatedModules = [...prev.modules];
+      const updatedWeeks = [...prev.weeks];
+      const updatedModules = [...updatedWeeks[weekIndex].modules];
       updatedModules[moduleIndex] = {
         ...updatedModules[moduleIndex],
         materials: updatedModules[moduleIndex].materials.filter((_, i) => i !== materialIndex)
       };
-      return { ...prev, modules: updatedModules };
+      updatedWeeks[weekIndex] = { ...updatedWeeks[weekIndex], modules: updatedModules };
+      return { ...prev, weeks: updatedWeeks };
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setIsSubmitting(true);
     setError('');
     setSuccess('');
     
     try {
+      const modules = formData.weeks.flatMap(week => week.modules);
+
+      const courseData = {
+        title: formData.title,
+        description: formData.description,
+        thumbnail: formData.thumbnail,
+        syllabus: formData.syllabus,
+        weeks: formData.weeks,
+        modules: modules
+      };
+
+      console.log(courseData)
+
       const response = await fetch('https://sankalp-deploy-1.onrender.com/api/courses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(courseData)
       });
       
       if (!response.ok) {
@@ -118,7 +229,13 @@ const CourseUploadForm: React.FC<CourseUploadFormProps> = ({ onClose }) => {
         title: '',
         description: '',
         thumbnail: '',
-        modules: [{ title: '', day: 1, videoUrl: '', materials: [''] }]
+        syllabus: '',
+        weeks: [{
+          weekNumber: 1,
+          title: 'Week 1',
+          description: 'Week 1 content and materials',
+          modules: [{ title: '', day: 1, week: 1, videoUrl: '', materials: [''] }]
+        }]
       });
       
       // Close form after 2 seconds
@@ -126,7 +243,7 @@ const CourseUploadForm: React.FC<CourseUploadFormProps> = ({ onClose }) => {
         onClose();
       }, 2000);
       
-    } catch (error) {
+    } catch (error: any) {
       setError(error.message || 'An error occurred');
     } finally {
       setIsSubmitting(false);
@@ -138,10 +255,10 @@ const CourseUploadForm: React.FC<CourseUploadFormProps> = ({ onClose }) => {
       <motion.div 
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-dark-200 rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+        className="bg-gray-800 rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto"
       >
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-primary-400">Upload New Course</h2>
+          <h2 className="text-xl font-bold text-blue-400">Upload New Course</h2>
           <button 
             onClick={onClose}
             className="text-gray-400 hover:text-white"
@@ -162,10 +279,11 @@ const CourseUploadForm: React.FC<CourseUploadFormProps> = ({ onClose }) => {
           </div>
         )}
         
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-6">
+          {/* Course Basic Information */}
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-primary-400 mb-1">
+              <label className="block text-sm font-medium text-blue-400 mb-1">
                 Course Title
               </label>
               <input
@@ -174,13 +292,13 @@ const CourseUploadForm: React.FC<CourseUploadFormProps> = ({ onClose }) => {
                 value={formData.title}
                 onChange={handleChange}
                 required
-                className="w-full bg-dark-100 border border-primary-800/20 rounded-lg p-3 text-gray-200"
+                className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-gray-200 focus:border-blue-400 focus:outline-none"
                 placeholder="Enter course title"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-primary-400 mb-1">
+              <label className="block text-sm font-medium text-blue-400 mb-1">
                 Description
               </label>
               <textarea
@@ -189,13 +307,13 @@ const CourseUploadForm: React.FC<CourseUploadFormProps> = ({ onClose }) => {
                 onChange={handleChange}
                 required
                 rows={3}
-                className="w-full bg-dark-100 border border-primary-800/20 rounded-lg p-3 text-gray-200"
+                className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-gray-200 focus:border-blue-400 focus:outline-none"
                 placeholder="Enter course description"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-primary-400 mb-1">
+              <label className="block text-sm font-medium text-blue-400 mb-1">
                 Thumbnail URL
               </label>
               <input
@@ -203,124 +321,201 @@ const CourseUploadForm: React.FC<CourseUploadFormProps> = ({ onClose }) => {
                 name="thumbnail"
                 value={formData.thumbnail}
                 onChange={handleChange}
-                className="w-full bg-dark-100 border border-primary-800/20 rounded-lg p-3 text-gray-200"
+                className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-gray-200 focus:border-blue-400 focus:outline-none"
                 placeholder="Enter thumbnail URL (optional)"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-blue-400 mb-1">
+                Syllabus URL
+              </label>
+              <input
+                type="text"
+                name="syllabus"
+                value={formData.syllabus}
+                onChange={handleChange}
+                className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-gray-200 focus:border-blue-400 focus:outline-none"
+                placeholder="Enter syllabus URL (optional)"
               />
             </div>
           </div>
           
+          {/* Weeks and Modules */}
           <div>
-            <h3 className="text-lg font-semibold text-primary-400 mb-4">Course Modules</h3>
-            
-            {formData.modules.map((module, moduleIndex) => (
+            <h3 className="text-lg font-semibold text-blue-400 mb-4">Course Structure</h3>
+
+            {formData.weeks.map((week, weekIndex) => (
               <div 
-                key={moduleIndex}
-                className="bg-dark-100 border border-primary-800/20 rounded-lg p-4 mb-4"
+                key={weekIndex}
+                className="bg-gray-700 border border-gray-600 rounded-lg p-4 mb-6"
               >
-                <div className="flex justify-between items-center mb-3">
-                  <h4 className="font-medium text-gray-200">Module {module.day}</h4>
-                  {formData.modules.length > 1 && (
+                <div className="flex justify-between items-center mb-4">
+                  <h4 className="font-medium text-gray-200 text-lg">{week.title}</h4>
+                  {formData.weeks.length > 1 && (
                     <button
                       type="button"
-                      onClick={() => removeModule(moduleIndex)}
+                      onClick={() => removeWeek(weekIndex)}
                       className="text-red-400 hover:text-red-300"
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>
                   )}
                 </div>
-                
-                <div className="space-y-3">
+
+                <div className="space-y-3 mb-4">
                   <div>
-                    <label className="block text-sm font-medium text-primary-400 mb-1">
-                      Module Title
+                    <label className="block text-sm font-medium text-blue-400 mb-1">
+                      Week Title
                     </label>
                     <input
                       type="text"
-                      value={module.title}
-                      onChange={(e) => handleModuleChange(moduleIndex, 'title', e.target.value)}
-                      required
-                      className="w-full bg-dark-300 border border-primary-800/20 rounded-lg p-3 text-gray-200"
-                      placeholder="Enter module title"
+                      value={week.title}
+                      onChange={(e) => handleWeekChange(weekIndex, 'title', e.target.value)}
+                      className="w-full bg-gray-600 border border-gray-500 rounded-lg p-3 text-gray-200 focus:border-blue-400 focus:outline-none"
+                      placeholder="Enter week title"
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-primary-400 mb-1">
-                      Video URL (YouTube)
+                    <label className="block text-sm font-medium text-blue-400 mb-1">
+                      Week Description
                     </label>
-                    <input
-                      type="text"
-                      value={module.videoUrl}
-                      onChange={(e) => handleModuleChange(moduleIndex, 'videoUrl', e.target.value)}
-                      required
-                      className="w-full bg-dark-300 border border-primary-800/20 rounded-lg p-3 text-gray-200"
-                      placeholder="Enter YouTube video URL"
+                    <textarea
+                      value={week.description}
+                      onChange={(e) => handleWeekChange(weekIndex, 'description', e.target.value)}
+                      rows={2}
+                      className="w-full bg-gray-600 border border-gray-500 rounded-lg p-3 text-gray-200 focus:border-blue-400 focus:outline-none"
+                      placeholder="Enter week description"
                     />
                   </div>
+                </div>
+
+                {/* Modules for this week */}
+                <div className="space-y-4">
+                  <h5 className="font-medium text-gray-300">Days/Modules</h5>
                   
-                  <div>
-                    <label className="block text-sm font-medium text-primary-400 mb-1">
-                      Materials
-                    </label>
-                    {module.materials.map((material, materialIndex) => (
-                      <div key={materialIndex} className="flex items-center mb-2">
-                        <input
-                          type="text"
-                          value={material}
-                          onChange={(e) => handleMaterialChange(moduleIndex, materialIndex, e.target.value)}
-                          className="flex-1 bg-dark-300 border border-primary-800/20 rounded-lg p-3 text-gray-200"
-                          placeholder="Enter material name"
-                        />
-                        {module.materials.length > 1 && (
+                  {week.modules.map((module, moduleIndex) => (
+                    <div 
+                      key={moduleIndex}
+                      className="bg-gray-600 border border-gray-500 rounded-lg p-4"
+                    >
+                      <div className="flex justify-between items-center mb-3">
+                        <h6 className="font-medium text-gray-200">Day {module.day}</h6>
+                        {week.modules.length > 1 && (
                           <button
                             type="button"
-                            onClick={() => removeMaterial(moduleIndex, materialIndex)}
-                            className="ml-2 text-red-400 hover:text-red-300"
+                            onClick={() => removeDay(weekIndex, moduleIndex)}
+                            className="text-red-400 hover:text-red-300"
                           >
-                            <Trash2 className="w-5 h-5" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         )}
                       </div>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={() => addMaterial(moduleIndex)}
-                      className="text-primary-400 hover:text-primary-300 flex items-center text-sm"
-                    >
-                      <Plus className="w-4 h-4 mr-1" /> Add Material
-                    </button>
-                  </div>
+                      
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-sm font-medium text-blue-400 mb-1">
+                            Module Title
+                          </label>
+                          <input
+                            type="text"
+                            value={module.title}
+                            onChange={(e) => handleModuleChange(weekIndex, moduleIndex, 'title', e.target.value)}
+                            required
+                            className="w-full bg-gray-500 border border-gray-400 rounded-lg p-3 text-gray-200 focus:border-blue-400 focus:outline-none"
+                            placeholder="Enter module title"
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-blue-400 mb-1">
+                            Video URL (YouTube)
+                          </label>
+                          <input
+                            type="text"
+                            value={module.videoUrl}
+                            onChange={(e) => handleModuleChange(weekIndex, moduleIndex, 'videoUrl', e.target.value)}
+                            required
+                            className="w-full bg-gray-500 border border-gray-400 rounded-lg p-3 text-gray-200 focus:border-blue-400 focus:outline-none"
+                            placeholder="Enter YouTube video URL"
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-blue-400 mb-1">
+                            Materials
+                          </label>
+                          {module.materials.map((material, materialIndex) => (
+                            <div key={materialIndex} className="flex items-center mb-2">
+                              <input
+                                type="text"
+                                value={material}
+                                onChange={(e) => handleMaterialChange(weekIndex, moduleIndex, materialIndex, e.target.value)}
+                                className="flex-1 bg-gray-500 border border-gray-400 rounded-lg p-3 text-gray-200 focus:border-blue-400 focus:outline-none"
+                                placeholder="Enter material name"
+                              />
+                              {module.materials.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeMaterial(weekIndex, moduleIndex, materialIndex)}
+                                  className="ml-2 text-red-400 hover:text-red-300"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                          <button
+                            type="button"
+                            onClick={() => addMaterial(weekIndex, moduleIndex)}
+                            className="text-blue-400 hover:text-blue-300 flex items-center text-sm"
+                          >
+                            <Plus className="w-4 h-4 mr-1" /> Add Material
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <button
+                    type="button"
+                    onClick={() => addDay(weekIndex)}
+                    className="bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 font-medium rounded-lg px-4 py-2 transition duration-200 flex items-center"
+                  >
+                    <Plus className="w-4 h-4 mr-1" /> Add Day
+                  </button>
                 </div>
               </div>
             ))}
             
             <button
               type="button"
-              onClick={addModule}
-              className="bg-primary-600/20 hover:bg-primary-600/30 text-primary-400 font-medium rounded-lg px-4 py-2 transition duration-200 flex items-center"
+              onClick={addWeek}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg px-6 py-3 transition duration-200 flex items-center"
             >
-              <Plus className="w-5 h-5 mr-1" /> Add Module
+              <Plus className="w-5 h-5 mr-2" /> Add Week
             </button>
           </div>
           
-          <div className="flex justify-end space-x-3">
+          <div className="flex justify-end space-x-3 pt-6">
             <button
               type="button"
               onClick={onClose}
-              className="bg-dark-300 hover:bg-dark-400 text-gray-300 font-medium rounded-lg px-6 py-3 transition duration-200"
+              className="bg-gray-600 hover:bg-gray-700 text-gray-300 font-medium rounded-lg px-6 py-3 transition duration-200"
             >
               Cancel
             </button>
             <button
-              type="submit"
+              type="button"
+              onClick={handleSubmit}
               disabled={isSubmitting}
-              className="bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg px-6 py-3 transition duration-200 disabled:opacity-70"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg px-6 py-3 transition duration-200 disabled:opacity-70"
             >
               {isSubmitting ? 'Uploading...' : 'Upload Course'}
             </button>
           </div>
-        </form>
+        </div>
       </motion.div>
     </div>
   );
