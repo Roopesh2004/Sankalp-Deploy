@@ -492,7 +492,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
                                 <ul className="space-y-2 text-gray-300">
                                   {module.materials && module.materials.length > 0 ? (
                                     module.materials.map((material, index) => (
-                                      <li key={index} className="bg-dark-300 p-3 rounded-md text-sm">
+                                      material && <li key={index} className="bg-dark-300 p-3 rounded-md text-sm">
                                         <div className="flex items-start">
                                           <BookOpen className="w-4 h-4 mr-2 mt-0.5 text-primary-400 flex-shrink-0" />
                                           <span onClick={()=>openMaterial(material)} style={{ cursor: 'pointer' }}>Material {index+1}</span>
