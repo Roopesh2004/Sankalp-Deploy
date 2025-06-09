@@ -274,8 +274,8 @@ const ServiceCard = ({
     },
     hover: { 
       y: -10,
-      scale: 1.03,
-      boxShadow: `0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3), 0 0 0 2px rgb(139, 92, 246, 0.3)`,
+      scale: 1.05,
+      boxShadow: `0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 3px rgb(139, 92, 246, 0.4)`,
       transition: { 
         type: "spring", 
         stiffness: 400, 
@@ -287,7 +287,7 @@ const ServiceCard = ({
   const glowVariants: Variants = {
     initial: { opacity: 0 },
     hover: { 
-      opacity: 0.6,
+      opacity: 0.8,
       transition: { duration: 0.3 }
     }
   };
@@ -305,87 +305,93 @@ const ServiceCard = ({
       variants={cardVariants}
       initial="hidden"
       animate={controls}
-      className="bg-dark-300/80 backdrop-blur-sm rounded-xl overflow-hidden transition-all duration-300 border border-dark-400 relative cursor-pointer aspect-[4/3]"
+      className="rounded-xl overflow-hidden transition-all duration-300 relative cursor-pointer shadow-2xl"
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
       onClick={onClick}
       style={{ transformStyle: 'preserve-3d' }}
     >
-      {/* Animated glow effect */}
+      {/* Enhanced animated glow effect */}
       <motion.div 
-        className="absolute inset-0 blur-xl rounded-xl"
+        className="absolute inset-0 blur-xl rounded-xl -z-10"
         variants={glowVariants}
         initial="initial"
         animate={isHovered ? "hover" : "initial"}
         style={{ 
-          backgroundColor: highlight === 'blue' ? 'rgba(59, 130, 246, 0.2)' :
-                          highlight === 'green' ? 'rgba(16, 185, 129, 0.2)' :
-                          highlight === 'purple' ? 'rgba(139, 92, 246, 0.2)' :
-                          highlight === 'red' ? 'rgba(239, 68, 68, 0.2)' :
-                          highlight === 'yellow' ? 'rgba(245, 158, 11, 0.2)' :
-                          highlight === 'indigo' ? 'rgba(99, 102, 241, 0.2)' :
-                          highlight === 'teal' ? 'rgba(20, 184, 166, 0.2)' :
-                          highlight === 'pink' ? 'rgba(236, 72, 153, 0.2)' :
-                          highlight === 'cyan' ? 'rgba(6, 182, 212, 0.2)' :
-                          highlight === 'orange' ? 'rgba(249, 115, 22, 0.2)' :
-                          'rgba(99, 102, 241, 0.2)'
+          backgroundColor: highlight === 'blue' ? 'rgba(59, 130, 246, 0.3)' :
+                          highlight === 'green' ? 'rgba(16, 185, 129, 0.3)' :
+                          highlight === 'purple' ? 'rgba(139, 92, 246, 0.3)' :
+                          highlight === 'red' ? 'rgba(239, 68, 68, 0.3)' :
+                          highlight === 'yellow' ? 'rgba(245, 158, 11, 0.3)' :
+                          highlight === 'indigo' ? 'rgba(99, 102, 241, 0.3)' :
+                          highlight === 'teal' ? 'rgba(20, 184, 166, 0.3)' :
+                          highlight === 'pink' ? 'rgba(236, 72, 153, 0.3)' :
+                          highlight === 'cyan' ? 'rgba(6, 182, 212, 0.3)' :
+                          highlight === 'orange' ? 'rgba(249, 115, 22, 0.3)' :
+                          'rgba(99, 102, 241, 0.3)'
         }}
       />
 
-      {/* Full card image */}
-      <div className="absolute inset-0 relative overflow-hidden">
-        <img 
-          src={backgroundImage}
-          alt="Course"
-          className="w-full h-full object-cover"
-        />
-        <div 
-          className="absolute inset-0"
-          style={{
-            background: 'linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 100%)'
-          }}
-        />
-        {/* Animated particles in the card */}
-        {isHovered && (
-          <motion.div 
-            className="absolute inset-0 opacity-60"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.6 }}
-            transition={{ duration: 0.5 }}
-          >
-            {[...Array(20)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute rounded-full bg-white"
-                initial={{ 
-                  x: Math.random() * 100 + '%', 
-                  y: Math.random() * 100 + '%',
-                  opacity: Math.random() * 0.5 + 0.3
-                }}
-                animate={{ 
-                  y: [null, Math.random() * -100], 
-                  opacity: [null, 0],
-                }}
-                transition={{
-                  duration: Math.random() * 2 + 1,
-                  repeat: Infinity,
-                  repeatType: 'loop',
-                  ease: 'easeOut',
-                  delay: Math.random() * 2
-                }}
-                style={{
-                  width: Math.random() * 3 + 1 + 'px',
-                  height: Math.random() * 3 + 1 + 'px',
-                }}
-              />
-            ))}
-          </motion.div>
-        )}
-      </div>
+      {/* Image that determines card shape */}
+      <img 
+        src={backgroundImage}
+        alt="Course"
+        className="block w-full h-auto transition-all duration-300 filter brightness-110 saturate-110"
+        style={{
+          filter: isHovered ? 'brightness(125%) saturate(120%) contrast(110%)' : 'brightness(110%) saturate(110%)'
+        }}
+      />
       
-      {/* Bottom shine effect */}
+      {/* Subtle overlay for better image pop */}
+      <div 
+        className="absolute inset-0 transition-opacity duration-300"
+        style={{
+          background: isHovered 
+            ? 'linear-gradient(135deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.05) 100%)'
+            : 'linear-gradient(135deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.1) 100%)'
+        }}
+      />
+      
+      {/* Enhanced animated particles in the card */}
+      {isHovered && (
+        <motion.div 
+          className="absolute inset-0 opacity-70"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.7 }}
+          transition={{ duration: 0.5 }}
+        >
+          {[...Array(25)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute rounded-full bg-white shadow-lg"
+              initial={{ 
+                x: Math.random() * 100 + '%', 
+                y: Math.random() * 100 + '%',
+                opacity: Math.random() * 0.6 + 0.4
+              }}
+              animate={{ 
+                y: [null, Math.random() * -120], 
+                opacity: [null, 0],
+              }}
+              transition={{
+                duration: Math.random() * 2.5 + 1.5,
+                repeat: Infinity,
+                repeatType: 'loop',
+                ease: 'easeOut',
+                delay: Math.random() * 2
+              }}
+              style={{
+                width: Math.random() * 4 + 2 + 'px',
+                height: Math.random() * 4 + 2 + 'px',
+              }}
+            />
+          ))}
+        </motion.div>
+      )}
+      
+      {/* Enhanced bottom shine effect */}
       <motion.div 
-        className="absolute bottom-0 left-0 right-0 h-1"
+        className="absolute bottom-0 left-0 right-0 h-2"
         initial={{ scaleX: 0, opacity: 0 }}
         animate={isHovered ? { scaleX: 1, opacity: 1 } : { scaleX: 0, opacity: 0 }}
         transition={{ duration: 0.5 }}
@@ -400,8 +406,32 @@ const ServiceCard = ({
                      color.includes('pink') ? 'linear-gradient(to right, #db2777, #ec4899)' :
                      color.includes('cyan') ? 'linear-gradient(to right, #0891b2, #06b6d4)' :
                      color.includes('orange') ? 'linear-gradient(to right, #ea580c, #f97316)' :
-                     'linear-gradient(to right, #4f46e5, #6366f1)'
+                     'linear-gradient(to right, #4f46e5, #6366f1)',
+          boxShadow: '0 0 20px rgba(139, 92, 246, 0.6)'
         }}
+      />
+
+      {/* Additional border glow on hover */}
+      <motion.div 
+        className="absolute inset-0 rounded-xl border-2 border-transparent"
+        animate={isHovered ? { 
+          borderColor: highlight === 'blue' ? '#3b82f6' :
+                      highlight === 'green' ? '#10b981' :
+                      highlight === 'purple' ? '#8b5cf6' :
+                      highlight === 'red' ? '#ef4444' :
+                      highlight === 'yellow' ? '#f59e0b' :
+                      highlight === 'indigo' ? '#6366f1' :
+                      highlight === 'teal' ? '#14b8a6' :
+                      highlight === 'pink' ? '#ec4899' :
+                      highlight === 'cyan' ? '#06b6d4' :
+                      highlight === 'orange' ? '#f97316' :
+                      '#8b5cf6',
+          opacity: 0.6
+        } : { 
+          borderColor: 'transparent',
+          opacity: 0
+        }}
+        transition={{ duration: 0.3 }}
       />
     </motion.div>
   );
