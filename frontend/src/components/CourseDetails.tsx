@@ -583,7 +583,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
                     disabled={isSubmitting || !transactionId.trim()}
                     className="w-full py-2 px-4 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-md transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isSubmitting ? 'Processing...' : 'Continue to Terms & Conditions'}
+                    {isSubmitting ? 'Processing...' : 'Submit'}
                   </button>
                 </form>
               </div>
@@ -599,6 +599,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
         );
     }
   };
+  console.log(course.thumbnail)
 
   return (
     <>
@@ -614,7 +615,8 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
           </motion.button>
           <h2 className="text-2xl font-bold text-primary-400">{course.title}</h2>
         </div>
-        <img className='w-full h-[30vh] object-cover rounded-lg' src={course.thumbnail}></img>
+
+        <img className='w-full h-[30vh] object-fill rounded-lg' src={course.thumbnail}></img>
         <div className="flex flex-row justify-between items-start gap-4 bg-dark-200">
           {/* Left content: course tile and description */}
           <div className="flex-1 bg-dark-200 p-4 rounded-lg">

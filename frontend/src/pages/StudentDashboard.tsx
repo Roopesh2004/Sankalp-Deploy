@@ -241,9 +241,9 @@ const EnhancedCourseCard: React.FC<CourseCardProps> = ({ course, onClick, index 
             <motion.div
               variants={floatingVariants}
               animate="animate"
-              className="p-2 bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-2xl backdrop-blur-lg border border-purple-500/30"
+              className="p-2 bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-2xl backdrop-blur-lg border border-purple-500/30 w-full"
             >
-              <img src={course.thumbnail}></img>
+              <img src={course.thumbnail} className='object-cover w-full h-[150px]'></img>
             </motion.div>
           </div>
           
