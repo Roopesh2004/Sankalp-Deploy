@@ -872,184 +872,185 @@ export const StudentDashboard: React.FC = () => {
         }
       `}</style>
 
-      {/* Enhanced Animated Footer */}
-      <motion.footer 
-        className="relative mt-20 bg-black/90 border-t border-primary-800/30 overflow-hidden"
-        initial={{ opacity: 0, y: 100 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, delay: 0.5 }}
+      {/* Enhanced Animated Footer - Seamless Integration */}
+<motion.footer 
+  className="relative mt-20 overflow-hidden"
+  initial={{ opacity: 0, y: 100 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 1, delay: 0.5 }}
+>
+  {/* Floating background particles */}
+  <div className="absolute inset-0 overflow-hidden">
+    {[...Array(30)].map((_, i) => (
+      <motion.div
+        key={i}
+        className="absolute bg-purple-500/20 rounded-full"
+        style={{
+          width: Math.random() * 3 + 1 + 'px',
+          height: Math.random() * 3 + 1 + 'px',
+          top: Math.random() * 100 + '%',
+          left: Math.random() * 100 + '%',
+        }}
+        animate={{
+          y: [-20, -80, -20],
+          x: [-10, 10, -10],
+          opacity: [0.1, 0.4, 0.1],
+        }}
+        transition={{
+          duration: Math.random() * 8 + 6,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: Math.random() * 3
+        }}
+      />
+    ))}
+  </div>
+
+  {/* Main footer content */}
+  <div className="relative z-10 py-20 px-4">
+    <div className="max-w-7xl mx-auto text-center">
+      {/* Mascot container with sick animations */}
+      <motion.div 
+        className="relative inline-block"
+        initial={{ scale: 0, y: 50 }}
+        animate={{ scale: 1, y: 0 }}
+        transition={{ 
+          type: "spring", 
+          stiffness: 80, 
+          damping: 12,
+          delay: 0.8 
+        }}
       >
-        {/* Floating background particles */}
-        <div className="absolute inset-0 overflow-hidden">
-          {[...Array(30)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute bg-purple-500/20 rounded-full"
-              style={{
-                width: Math.random() * 3 + 1 + 'px',
-                height: Math.random() * 3 + 1 + 'px',
-                top: Math.random() * 100 + '%',
-                left: Math.random() * 100 + '%',
-              }}
-              animate={{
-                y: [-20, -80, -20],
-                x: [-10, 10, -10],
-                opacity: [0.1, 0.4, 0.1],
-              }}
-              transition={{
-                duration: Math.random() * 8 + 6,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: Math.random() * 3
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Main footer content */}
-        <div className="relative z-10 py-20 px-4">
-          <div className="max-w-7xl mx-auto text-center">
-            {/* Mascot container with sick animations */}
-            <motion.div 
-              className="relative inline-block"
-              initial={{ scale: 0, y: 50 }}
-              animate={{ scale: 1, y: 0 }}
-              transition={{ 
-                type: "spring", 
-                stiffness: 80, 
-                damping: 12,
-                delay: 0.8 
-              }}
-            >
-              {/* Multiple glow layers for sick effect */}
-              <motion.div
-                className="absolute inset-0 w-48 h-48 mx-auto bg-gradient-to-r from-purple-600/60 via-blue-600/60 to-cyan-600/60 rounded-full"
-                style={{ filter: 'blur(40px)' }}
-                animate={{
-                  scale: [1, 1.4, 1],
-                  opacity: [0.6, 1, 0.6]
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
-              
-              <motion.div
-                className="absolute inset-0 w-48 h-48 mx-auto bg-gradient-to-r from-cyan-500/40 via-purple-500/40 to-blue-500/40 rounded-full"
-                style={{ filter: 'blur(60px)' }}
-                animate={{
-                  scale: [1.2, 1.6, 1.2],
-                  opacity: [0.3, 0.7, 0.3],
-                  rotate: [0, 180, 360]
-                }}
-                transition={{
-                  duration: 5,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: 1
-                }}
-              />
-              
-              {/* Mascot image with sick movement */}
-              <motion.div
-                className="relative z-10 w-48 h-48 mx-auto"
-                whileHover={{ 
-                  scale: 1.15,
-                  rotate: [0, -8, 8, -8, 0],
-                  transition: { duration: 0.6 }
-                }}
-                animate={{
-                  y: [-8, 8, -8],
-                  rotate: [-2, 2, -2],
-                }}
-                transition={{
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              >
-                <motion.img 
-                  src="/mascot.png" 
-                  alt="Sankalp Mascot" 
-                  className="w-full h-full object-contain drop-shadow-2xl"
-                  animate={{
-                    filter: [
-                      'drop-shadow(0 0 20px rgba(124, 58, 237, 0.8))',
-                      'drop-shadow(0 0 40px rgba(59, 130, 246, 0.8))',
-                      'drop-shadow(0 0 30px rgba(6, 182, 212, 0.8))',
-                      'drop-shadow(0 0 20px rgba(124, 58, 237, 0.8))'
-                    ]
-                  }}
-                  transition={{
-                    duration: 4,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                />
-                
-                {/* Energy particles around mascot */}
-                {[...Array(12)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    className="absolute w-3 h-3 bg-gradient-to-r from-purple-400 to-cyan-400 rounded-full"
-                    style={{
-                      top: `${30 + Math.sin(i * Math.PI / 6) * 70}%`,
-                      left: `${50 + Math.cos(i * Math.PI / 6) * 70}%`,
-                      filter: 'blur(1px)'
-                    }}
-                    animate={{
-                      scale: [0, 1.5, 0],
-                      opacity: [0, 1, 0],
-                      x: [0, Math.cos(i * Math.PI / 6) * 20, 0],
-                      y: [0, Math.sin(i * Math.PI / 6) * 20, 0]
-                    }}
-                    transition={{
-                      duration: 2.5,
-                      delay: i * 0.15,
-                      repeat: Infinity,
-                      repeatDelay: 2
-                    }}
-                  />
-                ))}
-              </motion.div>
-            </motion.div>
-
-            {/* Animated text below mascot */}
-            <motion.div
-              className="mt-12"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.2, duration: 0.8 }}
-            >
-              <motion.p 
-                className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 text-lg font-bold"
-                animate={{
-                  backgroundPosition: ["0%", "100%", "0%"]
-                }}
-                transition={{ duration: 4, repeat: Infinity }}
-              >
-                Powered by Innovation • Driven by Excellence
-              </motion.p>
-            </motion.div>
-          </div>
-        </div>
-
-        {/* Bottom energy wave */}
+        {/* Multiple glow layers for sick effect */}
         <motion.div
-          className="absolute bottom-0 left-0 w-full h-2 bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600"
+          className="absolute inset-0 w-48 h-48 mx-auto bg-gradient-to-r from-purple-600/60 via-blue-600/60 to-cyan-600/60 rounded-full"
+          style={{ filter: 'blur(40px)' }}
           animate={{
-            backgroundPosition: ["0%", "100%", "0%"],
+            scale: [1, 1.4, 1],
             opacity: [0.6, 1, 0.6]
           }}
           transition={{
             duration: 3,
             repeat: Infinity,
-            ease: "linear"
+            ease: "easeInOut"
           }}
         />
-      </motion.footer>
+        
+        <motion.div
+          className="absolute inset-0 w-48 h-48 mx-auto bg-gradient-to-r from-cyan-500/40 via-purple-500/40 to-blue-500/40 rounded-full"
+          style={{ filter: 'blur(60px)' }}
+          animate={{
+            scale: [1.2, 1.6, 1.2],
+            opacity: [0.3, 0.7, 0.3],
+            rotate: [0, 180, 360]
+          }}
+          transition={{
+            duration: 5,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1
+          }}
+        />
+        
+        {/* Mascot image with sick movement */}
+        <motion.div
+          className="relative z-10 w-48 h-48 mx-auto"
+          whileHover={{ 
+            scale: 1.15,
+            rotate: [0, -8, 8, -8, 0],
+            transition: { duration: 0.6 }
+          }}
+          animate={{
+            y: [-8, 8, -8],
+            rotate: [-2, 2, -2],
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        >
+          <motion.img 
+            src="/mascot.png" 
+            alt="Sankalp Mascot" 
+            className="w-full h-full object-contain drop-shadow-2xl"
+            animate={{
+              filter: [
+                'drop-shadow(0 0 20px rgba(124, 58, 237, 0.8))',
+                'drop-shadow(0 0 40px rgba(59, 130, 246, 0.8))',
+                'drop-shadow(0 0 30px rgba(6, 182, 212, 0.8))',
+                'drop-shadow(0 0 20px rgba(124, 58, 237, 0.8))'
+              ]
+            }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          />
+          
+          {/* Energy particles around mascot */}
+          {[...Array(12)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-3 h-3 bg-gradient-to-r from-purple-400 to-cyan-400 rounded-full"
+              style={{
+                top: `${30 + Math.sin(i * Math.PI / 6) * 70}%`,
+                left: `${50 + Math.cos(i * Math.PI / 6) * 70}%`,
+                filter: 'blur(1px)'
+              }}
+              animate={{
+                scale: [0, 1.5, 0],
+                opacity: [0, 1, 0],
+                x: [0, Math.cos(i * Math.PI / 6) * 20, 0],
+                y: [0, Math.sin(i * Math.PI / 6) * 20, 0]
+              }}
+              transition={{
+                duration: 2.5,
+                delay: i * 0.15,
+                repeat: Infinity,
+                repeatDelay: 2
+              }}
+            />
+          ))}
+        </motion.div>
+      </motion.div>
+
+      {/* Animated text below mascot */}
+      <motion.div
+        className="mt-12"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.2, duration: 0.8 }}
+      >
+        <motion.p 
+          className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 text-lg font-bold"
+          animate={{
+            backgroundPosition: ["0%", "100%", "0%"]
+          }}
+          transition={{ duration: 4, repeat: Infinity }}
+        >
+          Bridging Silence, Building Connections
+        </motion.p>
+      </motion.div>
+    </div>
+  </div>
+
+  {/* Bottom energy wave */}
+  <motion.div
+    className="absolute bottom-0 left-0 w-full h-2 bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600"
+    animate={{
+      backgroundPosition: ["0%", "100%", "0%"],
+      opacity: [0.6, 1, 0.6]
+    }}
+    transition={{
+      duration: 3,
+      repeat: Infinity,
+      ease: "linear"
+    }}
+  />
+</motion.footer>
+
     </div>
   );
 };
