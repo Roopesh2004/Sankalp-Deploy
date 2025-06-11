@@ -358,7 +358,7 @@ app.post('/api/login', async (req, res) => {
 
   app.post('/api/admin-approve', async (req, res) => {
     try {
-      const { value, email } = req.body;
+      const { courseId, email } = req.body;
       
       console.log(`Approving registration for email: ${email}`);
       
@@ -367,8 +367,8 @@ app.post('/api/login', async (req, res) => {
       
       // First, get the pending record to get courseId
       const [pendingRecords] = await connection.execute(
-        'SELECT * FROM pending WHERE email = ? AND status = 0',
-        [email]
+        'SELECT * FROM pending WHERE email = ? AND courseId=? AND status = 0',
+        [email,courseId]
       );
       
       if (pendingRecords.length === 0) {

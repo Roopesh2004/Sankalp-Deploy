@@ -46,35 +46,52 @@ export const AdminDashboard: React.FC = () => {
     fetchPendingRegistrations();
   }, []);
 
-  // Optimistic UI update for approvals
-  const approveUser = useCallback(async (email: string) => {
-    // Update UI immediately
+  // Add loading state at the top with other state declarations
+const [loadingApprovals, setLoadingApprovals] = useState(new Set());
+
+// Fixed approval function with better data identification
+const approveUser = useCallback(async (email: string, userId: string, itemData: any) => {
+  console.log('Approving user:', { email, userId, courseName: itemData.Course }); // Debug log
+  
+  // Add to loading set
+  setLoadingApprovals(prev => new Set(prev).add(userId));
+  
+  try {
+    const response = await fetch('https://sankalp-deploy-1.onrender.com/api/admin-approve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        value: 1, 
+        email,
+        userId: userId, // Include userId for better tracking
+        courseId: itemData.CourseId // Include courseId for verification
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Approval failed');
+    }
+
+    // Only update UI after successful API call using multiple identifiers
     setData(prevData => 
       prevData.map(item => 
-        item.Email === email ? { ...item, status: 1 } : item
+        item.id === userId && item.Email === email && item.CourseId === itemData.CourseId
+          ? { ...item, status: 1 } 
+          : item
       )
     );
-    
-    try {
-      const response = await fetch('https://sankalp-deploy-1.onrender.com/api/admin-approve', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ value: 1, email }),
-      });
-
-      if (!response.ok) {
-        // Revert on error
-        setData(prevData => 
-          prevData.map(item => 
-            item.Email === email ? { ...item, status: 0 } : item
-          )
-        );
-        throw new Error('Approval failed');
-      }
-    } catch (error) {
-      console.error('Approve error:', error);
-    }
-  }, []);
+  } catch (error) {
+    console.error('Approve error:', error);
+    alert('Failed to approve user. Please try again.'); // User feedback
+  } finally {
+    // Remove from loading set
+    setLoadingApprovals(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(userId);
+      return newSet;
+    });
+  }
+}, []);
 
   // Memoize course stats calculation
   const courseStats = useMemo(() => 
@@ -346,10 +363,11 @@ export const AdminDashboard: React.FC = () => {
                         <motion.button
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
-                          onClick={() => approveUser(item.Email)}
-                          className="bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg px-4 py-2 transition duration-200 w-full"
+                          onClick={() => approveUser(item.Email, item.id, item)}
+                          disabled={loadingApprovals.has(item.id)}
+                          className="bg-primary-600 hover:bg-primary-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium rounded-lg px-4 py-2 transition duration-200 w-full"
                         >
-                          Approve
+                          {loadingApprovals.has(item.id) ? 'Approving...' : 'Approve'}
                         </motion.button>
                       )}
                     </div>
@@ -461,7 +479,7 @@ export const AdminDashboard: React.FC = () => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => {
-                    approveUser(selectedRegistration.Email);
+                    approveUser(selectedRegistration.Email, selectedRegistration.id, selectedRegistration);
                     setShowDetailsModal(false);
                   }}
                   className="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition duration-200"

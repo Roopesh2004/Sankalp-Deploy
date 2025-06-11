@@ -590,7 +590,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
               
               <div className="flex-1 flex justify-center items-center">
                 <div className="bg-white p-4 rounded-lg">
-                  <QrCode size={150} className="text-dark-300" />
+                  <img src="/qr_scan.jpeg" alt="QR Code" className="w-[150px] h-[150px] object-contain" />
                   <p className="text-dark-300 text-center mt-2 text-sm">Scan to pay ₹{course.price}</p>
                 </div>
               </div>
