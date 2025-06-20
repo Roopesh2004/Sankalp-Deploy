@@ -271,20 +271,8 @@ const EnhancedCourseCard: React.FC<CourseCardProps> = ({ course, onClick, index 
             >
               {course.description}
             </motion.p>
-            
-            {/* Course meta */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center text-purple-400">
-                  <Clock className="w-4 h-4 mr-1" />
-                  <span className="text-xs font-medium">Level: {course.level}</span>
-                </div>
-                <div className="flex items-center text-cyan-400">
-                  <Award className="w-4 h-4 mr-1" />
-                  <span className="text-xs font-medium">Certificate</span>
-                </div>
-              </div>
-            </div>
+
+
           </div>
           
           {/* Enhanced CTA Button */}

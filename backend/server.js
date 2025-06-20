@@ -1269,8 +1269,57 @@ app.post('/api/reset-password', async (req, res) => {
   }
 });
 
+
+
+
+
+app.post('/api/verify-certificate', async (req, res) => {
+    try {
+      const { holderName, domainName , issueDate } = req.body;
+
+      console.log("Checking certificate for ", holderName, " at ", domainName, " at ", issueDate);
+      
+      // Validate input
+      if (!holderName || !domainName || !issueDate) {
+        return res.status(400).json({ message: 'HolderName and DomainName are required' });
+      }
+      
+      // Get user from database
+      const connection = await pool.getConnection();
+      const [pendingRecords] = await connection.execute(
+        'SELECT * FROM certificates WHERE name = ? AND domain = ? AND issueDate = ?',
+        [holderName, domainName, issueDate]
+      );
+      
+      connection.release();
+      // console.log(pendingRecords[0]);
+      if (pendingRecords.length == 1) {
+        return res.json({
+          message: 'Registration status found',
+          value: pendingRecords[0].status
+        });
+      } else {
+        return res.json({
+          message: 'No registration found',
+          value: -1
+        });
+      }
+      
+    } catch (error) {
+      console.error('Pending check error:', error);
+      res.status(500).json({ message: 'Failed to check registration status', error: error.message });
+    }
+  });
+
+
+
+
+
+
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+

@@ -4,6 +4,7 @@ import App from './App.tsx';
 import './index.css';
 import GetStarted from "./pages/GetStartedPage";
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import CertificateVerifier from './components/VerifyCertificate.tsx';
 
 const routes=createBrowserRouter(
   [
@@ -14,6 +15,10 @@ const routes=createBrowserRouter(
     {
       path:"/getstarted",
       element:<GetStarted/>
+    },
+    {
+      path:"/verify",
+      element:<CertificateVerifier/>
     },
   ]
 )

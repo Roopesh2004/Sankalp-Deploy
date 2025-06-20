@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, BookOpen, Clock, Award, QrCode, Play, X, Lock } from 'lucide-react';
+import { ArrowLeft, BookOpen, Clock, Award, QrCode, Play, X, Lock, Download } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface Material {
@@ -58,6 +58,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
   const [videoToken, setVideoToken] = useState<string | null>(null);
   const [isLoadingVideo, setIsLoadingVideo] = useState(false);
   const [grantedDate, setGrantedDate] = useState<number>(0);
+  const [finalWeekOpened, setFinalWeekOpened] = useState(false);
   
   // New states for terms and conditions modal
   const [showTermsModal, setShowTermsModal] = useState(false);
@@ -98,6 +99,62 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
     });
     
     return weeks.sort((a, b) => a.weekNumber - b.weekNumber);
+  };
+
+  // Function that triggers when final week is opened
+  const handleFinalWeekOpen = () => {
+    console.log('Final week has been opened!');
+    setFinalWeekOpened(true);
+    
+    // Add your custom operations here
+    // Example operations:
+    // - Update completion status
+    // - Send analytics event
+    // - Trigger certificate generation
+    // - Update user progress
+    
+    // You can add API calls or other operations here
+    // Example:
+    // updateCourseCompletion();
+    // trackFinalWeekAccess();
+  };
+
+  // Function to handle certificate download
+  const handleCertificateDownload = () => {
+    console.log('Downloading certificate...');
+    // Add your certificate download logic here
+    // This could be an API call to generate and download the certificate
+    
+    // Example implementation:
+    // const downloadCertificate = async () => {
+    //   try {
+    //     const response = await fetch('/api/download-certificate', {
+    //       method: 'POST',
+    //       headers: { 'Content-Type': 'application/json' },
+    //       body: JSON.stringify({ 
+    //         email, 
+    //         courseId: course.id, 
+    //         courseName: course.title 
+    //       }),
+    //     });
+    //     
+    //     if (response.ok) {
+    //       const blob = await response.blob();
+    //       const url = window.URL.createObjectURL(blob);
+    //       const a = document.createElement('a');
+    //       a.href = url;
+    //       a.download = `${course.title}_Certificate.pdf`;
+    //       document.body.appendChild(a);
+    //       a.click();
+    //       document.body.removeChild(a);
+    //       window.URL.revokeObjectURL(url);
+    //     }
+    //   } catch (error) {
+    //     console.error('Error downloading certificate:', error);
+    //   }
+    // };
+    // 
+    // downloadCertificate();
   };
 
   const getVideoToken = async (moduleId: number) => {
@@ -386,16 +443,33 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
       case 'approved':
         const weeks = groupModulesByWeek(course.modules, grantedDate);
         const accessibleWeeks = calculateAccessibleWeeks(grantedDate);
+        const finalWeekNumber = Math.max(...weeks.map(week => week.weekNumber));
         
         return (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-semibold text-primary-400">Course Content</h3>
-              <div className="text-sm text-gray-400">
-                {grantedDate === 0 ? (
-                  <span>Course started today • Week {accessibleWeeks} available</span>
-                ) : (
-                  <span>Week {accessibleWeeks} available</span>
+              <div className="flex items-center gap-4">
+                <div className="text-sm text-gray-400">
+                  {grantedDate === 0 ? (
+                    <span>Course started today • Week {accessibleWeeks} available</span>
+                  ) : (
+                    <span>Week {accessibleWeeks} available</span>
+                  )}
+                </div>
+                {/* Certificate Download Button - Only show when final week is opened */}
+                {finalWeekOpened && (
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleCertificateDownload}
+                    className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition duration-200"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Download Certificate</span>
+                  </motion.button>
                 )}
               </div>
             </div>
@@ -410,7 +484,17 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
                   {/* Week Header */}
                   <motion.button
                     whileHover={week.isAccessible ? { backgroundColor: 'rgba(124, 58, 237, 0.1)' } : {}}
-                    onClick={() => week.isAccessible && setActiveWeek(activeWeek === week.weekNumber ? null : week.weekNumber)}
+                    onClick={() => {
+                      if (week.isAccessible) {
+                        const newActiveWeek = activeWeek === week.weekNumber ? null : week.weekNumber;
+                        setActiveWeek(newActiveWeek);
+                        
+                        // Check if this is the final week being opened
+                        if (newActiveWeek === finalWeekNumber && newActiveWeek !== null) {
+                          handleFinalWeekOpen();
+                        }
+                      }
+                    }}
                     className={`w-full p-4 flex justify-between items-center text-left border-b border-dark-100 ${
                       !week.isAccessible ? 'cursor-not-allowed' : ''
                     }`}
@@ -422,6 +506,11 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ course, onBack, email, na
                           week.isAccessible ? 'text-primary-400' : 'text-gray-500'
                         }`}>
                           {week.title}
+                          {week.weekNumber === finalWeekNumber && (
+                            <span className="ml-2 text-xs bg-gold-500 text-black px-2 py-1 rounded-full">
+                              Final
+                            </span>
+                          )}
                         </h4>
                         {!week.isAccessible && (
                           <Lock className="w-4 h-4 ml-2 text-gray-500" />

@@ -82,6 +82,11 @@ const Navbar = () => {
       }
     }
   };
+  const navigate = useNavigate();
+  const handleVerifyClick = () => {
+    navigate('/verify');
+    window.location.reload();
+  };
 
   return (
     <motion.nav 
@@ -117,6 +122,8 @@ const Navbar = () => {
   <NavLink href="#programs">Programs</NavLink>
   <NavLink href="#about">About</NavLink>
   <NavLink href="#services">Services</NavLink>
+  <button onClick={handleVerifyClick} >Certificates</button>
+
   <ApplyButton/>
 </div>
 
