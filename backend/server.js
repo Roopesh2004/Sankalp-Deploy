@@ -1748,6 +1748,40 @@ app.get('/api/secure-video-mobile/:moduleId', async (req, res) => {
   }
 });
 
+// Backend (Express)
+app.get('/api/recommend-courses/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const connection = await pool.getConnection();
+
+    // Get course IDs the user is already enrolled in
+    const [userCourses] = await connection.execute(
+      `SELECT courseId FROM user_courses WHERE userId = ?`,
+      [userId]
+    );
+    const enrolledIds = userCourses.map(row => row.courseId);
+
+    // Fetch 3 random courses not already enrolled
+    const [recommended] = await connection.execute(
+      `
+      SELECT id, title, description FROM courses
+      WHERE id NOT IN (?) 
+      ORDER BY RAND()
+      LIMIT 3
+      `,
+      [enrolledIds.length ? enrolledIds : [0]] // Avoid SQL error if no enrolled
+    );
+
+    connection.release();
+    res.status(200).json({ success: true, data: recommended });
+  } catch (err) {
+    console.error('Error recommending courses:', err);
+    res.status(500).json({ success: false, message: 'Failed to recommend courses' });
+  }
+});
+
+
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
