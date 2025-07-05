@@ -1755,29 +1755,41 @@ app.get('/api/recommend-courses/:userId', async (req, res) => {
   try {
     const connection = await pool.getConnection();
 
-    // Get course IDs the user is already enrolled in
-    const [userCourses] = await connection.execute(
+    // Get all courseIds that the user is already enrolled in
+    const [enrolled] = await connection.execute(
       `SELECT courseId FROM user_courses WHERE userId = ?`,
       [userId]
     );
-    const enrolledIds = userCourses.map(row => row.courseId);
 
-    // Fetch 3 random courses not already enrolled
-    const [recommended] = await connection.execute(
-      `
-      SELECT id, title, description FROM courses
-      WHERE id NOT IN (?) 
-      ORDER BY RAND()
-      LIMIT 3
-      `,
-      [enrolledIds.length ? enrolledIds : [0]] // Avoid SQL error if no enrolled
-    );
+    const enrolledCourseIds = enrolled.map(row => row.courseId);
+
+    // Build the query dynamically
+    let recommendedQuery = `SELECT id, title, description FROM courses`;
+    let params = [];
+
+    if (enrolledCourseIds.length > 0) {
+      const placeholders = enrolledCourseIds.map(() => '?').join(', ');
+      recommendedQuery += ` WHERE id NOT IN (${placeholders})`;
+      params = enrolledCourseIds;
+    }
+
+    recommendedQuery += ` ORDER BY RAND() LIMIT 3`;
+
+    const [recommended] = await connection.execute(recommendedQuery, params);
 
     connection.release();
-    res.status(200).json({ success: true, data: recommended });
-  } catch (err) {
-    console.error('Error recommending courses:', err);
-    res.status(500).json({ success: false, message: 'Failed to recommend courses' });
+
+    res.status(200).json({
+      success: true,
+      data: recommended,
+    });
+  } catch (error) {
+    console.error('Error recommending courses:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch recommended courses',
+      error: error.message,
+    });
   }
 });
 
