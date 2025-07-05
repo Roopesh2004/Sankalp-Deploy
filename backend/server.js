@@ -1699,12 +1699,26 @@ app.get('/api/secure-video-mobile/:moduleId', async (req, res) => {
       position: absolute;
       left: 0;
       right: 0;
-      height: 7%;
       background: transparent;
       z-index: 10;
     }
     .block-top { top: 0; }
     .block-bottom { bottom: 0; }
+    /* Portrait orientation */
+    @media (orientation: portrait) {
+      .block-top,
+      .block-bottom {
+        height: 9%;
+      }
+    }
+
+    /* Landscape orientation */
+    @media (orientation: landscape) {
+      .block-top,
+      .block-bottom {
+        height: 15%; /* or any value that suits landscape layout */
+      }
+    }
   </style>
 </head>
 <body>
@@ -1729,7 +1743,6 @@ app.get('/api/secure-video-mobile/:moduleId', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
-
 
 // Start server
 const PORT = process.env.PORT || 5000;
