@@ -129,7 +129,7 @@ app.post('/api/register', async (req, res) => {
 // New endpoint to verify registration OTP
 app.post('/api/verify-registration', async (req, res) => {
   try {
-    const { email, otp } = req.body;
+    const { email, otp, reg } = req.body;
     
     if (!email || !otp) {
       return res.status(400).json({ message: 'Email and OTP are required' });
@@ -161,7 +161,7 @@ app.post('/api/verify-registration', async (req, res) => {
     // Insert new user
     const connection = await pool.getConnection();
     const [result] = await connection.execute(
-      'INSERT INTO students (name, email, phone, password) VALUES (?, ?, ?, ?)',
+      `INSERT INTO ${reg}s (name, email, phone, password) VALUES (?, ?, ?, ?)`,
       [name, userEmail, phone, hashedPassword]
     );
     
@@ -244,7 +244,8 @@ app.post('/api/login', async (req, res) => {
 
   app.post('/api/pending', async (req, res) => {
     try {
-      const { name, email, transid, refid , courseName, amt, courseId } = req.body;
+      const { pendingRegistrationData, reg } = req.body;
+      const { name, email, transid, refid , courseName, amt, courseId } = pendingRegistrationData;
       
       console.log(`Pending registration for email: ${email}, course: ${courseName}`);
       
@@ -258,8 +259,8 @@ app.post('/api/login', async (req, res) => {
       
       // Check if already in pending for this course
       const [existingPending] = await connection.execute(
-        'SELECT * FROM pending WHERE email = ? AND courseName = ?',
-        [email, courseName]
+        'SELECT * FROM pending WHERE email = ? AND courseName = ? AND employee = ?',
+        [email, courseName, reg==='student'?0:1]
       );
       
       if (existingPending.length > 0) {
@@ -272,8 +273,8 @@ app.post('/api/login', async (req, res) => {
       
       // Insert into pending table
       const [result] = await connection.execute(
-        'INSERT INTO pending (name, email, transactionid, referalid, courseName, amount, courseId, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [name, email, transid, refid, courseName, amt, courseId, 0]
+        'INSERT INTO pending (name, email, transactionid, referalid, courseName, amount, courseId, status, employee) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [name, email, transid, refid, courseName, amt, courseId, 0, reg==='student'?0:1]
       );
       
       connection.release();
@@ -292,9 +293,51 @@ app.post('/api/login', async (req, res) => {
   });
 
 
+   app.post('/api/maintenance', async (req, res) => {
+    try {
+      const {registrationData , reg} = req.body;
+
+      const regData= registrationData;
+      console.log(regData)
+      
+      // Validate input
+      if (!regData) {
+        return res.status(400).json({ message: 'All fields are required' });
+      }
+      
+      // Get user from database
+      const connection = await pool.getConnection();
+
+      
+
+      
+      // Check if already in pending for this course
+      const [existingPending] = await connection.execute(
+        'UPDATE pending SET maintenance_fee = ?, maintenance_transaction = ? WHERE email = ? AND courseName = ? AND employee = ?',
+        [1,regData.transid,regData.email, regData.courseName,reg==='employee'?1:0]
+      );
+      
+      if (existingPending.length) {
+        connection.release();
+        return res.status(409).json({});
+      }
+      
+      // console.log('Registration is under review');
+      
+      res.json({});
+      
+    } catch (error) {
+      // console.error('Registration error:', error);
+      res.status(500).json();
+    }
+  });
+
+  
+
+
   app.post('/api/pending-check', async (req, res) => {
     try {
-      const { email, courseId } = req.body;
+      const { email, courseId, reg } = req.body;
       
       console.log(`Pending check for email: ${email}, courseId: ${courseId}`);
       
@@ -306,8 +349,8 @@ app.post('/api/login', async (req, res) => {
       // Get user from database
       const connection = await pool.getConnection();
       const [pendingRecords] = await connection.execute(
-        'SELECT * FROM pending WHERE email = ? AND courseId = ?',
-        [email, courseId]
+        'SELECT * FROM pending WHERE email = ? AND courseId = ? AND employee = ?',
+        [email, courseId, reg==='employee'?1:0]
       );
       
       connection.release();
@@ -315,7 +358,7 @@ app.post('/api/login', async (req, res) => {
       if (pendingRecords.length > 0) {
         return res.json({
           message: 'Registration status found',
-          value: pendingRecords[0].status
+          value: pendingRecords[0]
         });
       } else {
         return res.json({
@@ -335,7 +378,7 @@ app.post('/api/login', async (req, res) => {
     try {
       const connection = await pool.getConnection();
       const [pendingRecords] = await connection.execute(
-        'SELECT * FROM pending'
+        'SELECT * FROM pending where maintenance_fee=1'
       );
       connection.release();
       
@@ -358,7 +401,7 @@ app.post('/api/login', async (req, res) => {
 
   app.post('/api/admin-approve', async (req, res) => {
     try {
-      const { courseId, email } = req.body;
+      const { courseId, email, reg } = req.body;
       
       console.log(`Approving registration for email: ${email}`);
       
@@ -367,8 +410,8 @@ app.post('/api/login', async (req, res) => {
       
       // First, get the pending record to get courseId
       const [pendingRecords] = await connection.execute(
-        'SELECT * FROM pending WHERE email = ? AND courseId=? AND status = 0',
-        [email,courseId]
+        'SELECT * FROM pending WHERE email = ? AND courseId=? AND status = 0 AND maintenance_fee = 1 AND employee = ?',
+        [email,courseId, reg]
       );
       
       if (pendingRecords.length === 0) {
@@ -380,13 +423,14 @@ app.post('/api/login', async (req, res) => {
       
       // Update pending status
       await connection.execute(
-        'UPDATE pending SET status = ? WHERE email = ? AND courseId = ?',
-        [1, email, pendingRecord.courseId]
+        'UPDATE pending SET status = ? WHERE email = ? AND courseId = ? AND employee = ?',
+        [1, email, pendingRecord.courseId, reg]
       );
       
-      // Get user ID
+      const table = reg === 0 ? 'students' : 'employees';
+
       const [users] = await connection.execute(
-        'SELECT id, name FROM students WHERE email = ?',
+        `SELECT id, name FROM ${table} WHERE email = ?`,
         [email]
       );
       
@@ -399,10 +443,19 @@ app.post('/api/login', async (req, res) => {
       const userName = users[0].name;
       
       // Add to user_courses table
-      await connection.execute(
-        'INSERT INTO user_courses (userId, courseId) VALUES (?, ?)',
-        [userId, pendingRecord.courseId]
+
+      if(reg===0){
+        await connection.execute(
+          'INSERT INTO user_courses (userId, courseId) VALUES (?, ?)',
+          [userId, pendingRecord.courseId]
+        );
+      }else{
+        await connection.execute(
+          'INSERT INTO employees_courses (studentId, courseId) VALUES (?, ?)',
+          [userId, pendingRecord.courseId]
       );
+      }
+
       
       connection.release();
       
@@ -440,7 +493,7 @@ app.get('/api/courses', async (req, res) => {
     const connection = await pool.getConnection();
     const [courses] = await connection.execute('SELECT * FROM courses');
     connection.release();
-    console.log(courses);
+    // console.log(courses);
     res.json(courses);
   } catch (error) {
     console.error('Error fetching courses:', error);
@@ -487,7 +540,7 @@ app.get('/api/module-materials/:courseId', async (req, res) => {
 // Add endpoint to check if user has access to a course
 app.post('/api/check-course-access', async (req, res) => {
   try {
-    const { email, courseId } = req.body;
+    const { email, courseId, reg } = req.body;
     
     console.log(`Checking course access for email: ${email}, courseId: ${courseId}`);
     
@@ -499,7 +552,7 @@ app.post('/api/check-course-access', async (req, res) => {
     // Get user ID from email
     const connection = await pool.getConnection();
     const [users] = await connection.execute(
-      'SELECT id FROM students WHERE email = ?',
+      `SELECT id FROM ${reg}s WHERE email = ?`,
       [email]
     );
     
@@ -509,19 +562,32 @@ app.post('/api/check-course-access', async (req, res) => {
     }
     
     const userId = users[0].id;
+
+    console.log(userId)
     
-    // Check if user has access to this course
-    const [accessRecords] = await connection.execute(
-      'SELECT * FROM user_courses WHERE userId = ? AND courseId = ?',
-      [userId, courseId]
-    );
+    const [accessRecords]= reg===0 ?
+      await connection.execute(
+        'SELECT * FROM user_courses WHERE userId = ? AND courseId = ?',
+        [userId, courseId]
+      )
+      :
+      await connection.execute(
+        'SELECT * FROM employees_courses WHERE studentId = ? AND courseId = ?',
+        [userId, courseId]
+      )
     
     connection.release();
     console.log(accessRecords)
-    return res.json({
-      hasAccess: accessRecords.length > 0,
-      grantedDate:accessRecords[0].accessGranted
-    });
+
+    if (accessRecords.length !==0){
+      return res.json({
+        hasAccess: accessRecords.length > 0,
+        grantedDate:accessRecords[0].accessGranted
+      });
+    }else{
+      return res.json({hasAccess: false})
+    }
+    
     
   } catch (error) {
     console.error('Course access check error:', error);
@@ -879,7 +945,7 @@ app.get('/api/secure-video/:moduleId', async (req, res) => {
 // Add a new endpoint to generate video tokens
 app.post('/api/generate-video-token', async (req, res) => {
   try {
-    const { email, moduleId } = req.body;
+    const { email, moduleId, reg } = req.body;
     
     if (!email || !moduleId) {
       return res.status(400).json({ message: 'Email and moduleId are required' });
@@ -890,7 +956,7 @@ app.post('/api/generate-video-token', async (req, res) => {
     
     // Get user ID
     const [users] = await connection.execute(
-      'SELECT id FROM students WHERE email = ?',
+      `SELECT id FROM ${reg}s WHERE email = ?`,
       [email]
     );
     
@@ -1015,7 +1081,7 @@ app.post('/api/courses', async (req, res) => {
 // Update user profile
 app.post('/api/update-profile', async (req, res) => {
   try {
-    const { originalEmail, name, email, phone } = req.body;
+    const { reg, originalEmail, name, email, phone } = req.body;
     
     // Validate input
     if (!originalEmail || !name || !email) {
@@ -1028,7 +1094,7 @@ app.post('/api/update-profile', async (req, res) => {
       // Check if the new email is already taken (if changing email)
       if (originalEmail !== email) {
         const [existingUsers] = await connection.execute(
-          'SELECT id FROM students WHERE email = ? AND email != ?',
+          `SELECT id FROM ${reg}s WHERE email = ? AND email != ?`,
           [email, originalEmail]
         );
         
@@ -1040,7 +1106,7 @@ app.post('/api/update-profile', async (req, res) => {
       
       // Update user profile
       const [result] = await connection.execute(
-        'UPDATE students SET name = ?, email = ?, phone = ? WHERE email = ?',
+        `UPDATE ${reg}s SET name = ?, email = ?, phone = ? WHERE email = ?`,
         [name, email, phone || null, originalEmail]
       );
       
@@ -1292,7 +1358,7 @@ app.post('/api/verify-certificate', async (req, res) => {
       );
       
       connection.release();
-      // console.log(pendingRecords[0]);
+
       if (pendingRecords.length == 1) {
         return res.json({
           message: 'Registration status found',
@@ -1313,6 +1379,133 @@ app.post('/api/verify-certificate', async (req, res) => {
 
 
 
+
+  app.post('/api/employee_login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      console.log(`Employee Login attempt for email: ${email}`);
+      
+      // Validate input
+      if (!email || !password) {
+        return res.status(400).json({ message: 'Email and password are required' });
+      }
+      
+      // Get user from database
+      const connection = await pool.getConnection();
+      const [users] = await connection.execute(
+        'SELECT * FROM employees WHERE email = ?',
+        [email]
+      );
+      
+      connection.release();
+      
+      if (users.length === 0) {
+        console.log(`No user found with email: ${email}`);
+        return res.status(401).json({ message: 'Invalid email or password' });
+      }
+      
+      const user = users[0];
+      console.log(`User found: ${user.name}, comparing passwords`);
+      console.log(password,user.password)
+      
+      // Compare password
+      const passwordMatch = await bcrypt.compare(password, user.password);
+      
+      if (!passwordMatch) {
+        console.log('Password does not match');
+        return res.status(401).json({ message: 'Invalid email or password' });
+      }
+      
+      console.log('Login successful');
+      
+      // Create user object without password
+      const userResponse = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone
+      };
+      
+      res.json({
+        message: 'Login successful',
+        user: userResponse
+      });
+      
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ message: 'Login failed', error: error.message });
+    }
+  });
+
+
+
+
+
+  app.post('/api/employee_register', async (req, res) => {
+    console.log("Found");
+  try {
+    const { name, email, phone, password } = req.body;
+    
+    // Validate input
+    if (!name || !email || !phone || !password) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+    
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: 'Invalid email format' });
+    }
+    
+    // Check if user already exists
+    const connection = await pool.getConnection();
+    const [existingUsers] = await connection.execute(
+      'SELECT * FROM employees WHERE email = ?',
+      [email]
+    );
+    
+    connection.release();
+    
+    if (existingUsers.length > 0) {
+      return res.status(409).json({ message: 'User with this email already exists' });
+    }
+    
+    // Generate a 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiry = Date.now() + REGISTRATION_OTP_EXPIRY;
+    
+    // Store OTP with user data
+    registrationOtpStore.set(email, { 
+      otp, 
+      expiry,
+      userData: { name, email, phone, password }
+    });
+    
+    // Send OTP via email
+    const mailOptions = {
+      from: process.env.EMAIL_FROM,
+      to: email,
+      subject: 'Email Verification OTP',
+      html: `
+        <h1>Email Verification</h1>
+        <p>Your OTP for email verification is: <strong>${otp}</strong></p>
+        <p>This OTP will expire in 10 minutes.</p>
+        <p>If you didn't request this, please ignore this email.</p>
+      `
+    };
+    
+    await transporter.sendMail(mailOptions);
+    
+    res.status(200).json({ 
+      message: 'OTP sent to your email. Please verify to complete registration.' 
+    });
+    
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ message: 'Registration failed', error: error.message });
+  }
+});
 
 
 

@@ -9,7 +9,7 @@ const AuthenticatedApp: React.FC = () => {
   const { user } = useAuth();
 
   if (!user) return <Login />;
-  return user.role === 'admin' ? <AdminDashboard /> : <StudentDashboard />;
+  return user.role === 'admin' ? <AdminDashboard /> : user.role === 'student' ? <StudentDashboard reg={"student"}/> : <StudentDashboard reg={"employee"}/>;
 };
 
 function GetStarted() {

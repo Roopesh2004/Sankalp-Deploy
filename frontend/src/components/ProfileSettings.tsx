@@ -1,65 +1,74 @@
-import React, { useState } from 'react';
-import { User } from '../types';
-import { Save, X } from 'lucide-react';
-import { motion } from 'framer-motion';
+import React, { useState } from "react";
+import { User } from "../types";
+import { Save, X } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface ProfileSettingsProps {
   user: User;
   onSave: (userData: Partial<User>) => void;
   onClose: () => void;
+  reg?: string;
 }
 
-export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, onSave, onClose }) => {
+export const ProfileSettings: React.FC<ProfileSettingsProps> = ({
+  user,
+  onSave,
+  onClose,
+  reg,
+}) => {
   const [formData, setFormData] = useState({
-    name: user.name || '',
-    email: user.email || '',
-    phone: user.phone || '',
+    name: user.name || "",
+    email: user.email || "",
+    phone: user.phone || "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError('');
-    setSuccess('');
-    
+    setError("");
+    setSuccess("");
+
     try {
       // Call API to update user data
-      const response = await fetch('https://sankalp-deploy-1.onrender.com/api/update-profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          originalEmail: user.email, // Used to identify the user
-          ...formData
-        }),
-      });
-      
+      const response = await fetch(
+        "https://sankalp-deploy-1.onrender.com/api/update-profile",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            reg,
+            originalEmail: user.email, // Used to identify the user
+            ...formData,
+          }),
+        }
+      );
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update profile');
+        throw new Error(errorData.message || "Failed to update profile");
       }
-      
-      setSuccess('Profile updated successfully');
-      
+
+      setSuccess("Profile updated successfully");
+
       // Call the onSave callback to update the UI
       onSave(formData);
-      
+
       // Close the form after 2 seconds
       setTimeout(() => {
         onClose();
       }, 2000);
-      
     } catch (err) {
-      setError(err.message || 'An error occurred');
+      setError(err.message || "An error occurred");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm h-screen flex items-center justify-center p-4 z-50">
+    <div className="relative inset-0 h-screen flex items-center justify-center p-4 z-50">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -75,10 +84,15 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, onSave, 
             transition={{ delay: 0.1 }}
           >
             <h2 className="text-2xl font-bold text-white">Profile Settings</h2>
-            <p className="text-gray-400 text-sm mt-1">Update your personal information</p>
+            <p className="text-gray-400 text-sm mt-1">
+              Update your personal information
+            </p>
           </motion.div>
           <motion.button
-            whileHover={{ scale: 1.1, backgroundColor: 'rgba(75, 85, 99, 0.5)' }}
+            whileHover={{
+              scale: 1.1,
+              backgroundColor: "rgba(75, 85, 99, 0.5)",
+            }}
             whileTap={{ scale: 0.9 }}
             onClick={onClose}
             className="text-gray-400 hover:text-white transition-colors p-2 rounded-full"
@@ -100,7 +114,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, onSave, 
             </div>
           </motion.div>
         )}
-        
+
         {success && (
           <motion.div
             initial={{ opacity: 0, x: -10 }}
@@ -116,12 +130,15 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, onSave, 
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <label className="block text-gray-200 text-sm font-semibold mb-3" htmlFor="name">
+            <label
+              className="block text-gray-200 text-sm font-semibold mb-3"
+              htmlFor="name"
+            >
               Full Name
             </label>
             <input
@@ -130,17 +147,22 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, onSave, 
               type="text"
               placeholder="Enter your full name"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               required
             />
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <label className="block text-gray-200 text-sm font-semibold mb-3" htmlFor="email">
+            <label
+              className="block text-gray-200 text-sm font-semibold mb-3"
+              htmlFor="email"
+            >
               Email Address
             </label>
             <input
@@ -149,17 +171,22 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, onSave, 
               type="email"
               placeholder="Enter your email address"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
               required
             />
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <label className="block text-gray-200 text-sm font-semibold mb-3" htmlFor="phone">
+            <label
+              className="block text-gray-200 text-sm font-semibold mb-3"
+              htmlFor="phone"
+            >
               Phone Number
             </label>
             <input
@@ -168,12 +195,14 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, onSave, 
               type="tel"
               placeholder="Enter your phone number"
               value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, phone: e.target.value })
+              }
             />
           </motion.div>
 
           {/* Action Buttons */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
@@ -189,7 +218,10 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, onSave, 
               Cancel
             </motion.button>
             <motion.button
-              whileHover={{ scale: 1.02, boxShadow: '0 10px 40px rgba(59, 130, 246, 0.3)' }}
+              whileHover={{
+                scale: 1.02,
+                boxShadow: "0 10px 40px rgba(59, 130, 246, 0.3)",
+              }}
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={isSubmitting}
@@ -202,7 +234,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, onSave, 
                   Saving...
                 </>
               ) : (
-                'Save Changes'
+                "Save Changes"
               )}
             </motion.button>
           </motion.div>

@@ -1,32 +1,36 @@
-import React, { useState } from 'react';
-import { CheckCircle, XCircle, Loader2, Shield } from 'lucide-react';
+import React, { useState } from "react";
+import { CheckCircle, XCircle, Loader2, Shield } from "lucide-react";
 
 export default function CertificateVerifier() {
   const [formData, setFormData] = useState({
-    holderName: '',
-    domainName: '',
-    issueDate: ''
+    holderName: "",
+    domainName: "",
+    issueDate: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [verificationResult, setVerificationResult] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const verifyCertificate = async () => {
     // Reset previous results
-    setError('');
+    setError("");
     setVerificationResult(null);
-    
+
     // Validate inputs
-    if (!formData.holderName.trim() || !formData.domainName.trim() || !formData.issueDate.trim()) {
-      setError('Please fill in all fields');
+    if (
+      !formData.holderName.trim() ||
+      !formData.domainName.trim() ||
+      !formData.issueDate.trim()
+    ) {
+      setError("Please fill in all fields");
       return;
     }
 
@@ -34,26 +38,28 @@ export default function CertificateVerifier() {
 
     try {
       // Replace this URL with your actual API endpoint
-      const response = await fetch('https://sankalp-deploy-1.onrender.com/api/verify-certificate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      });
+      const response = await fetch(
+        "https://sankalp-deploy-1.onrender.com/api/verify-certificate",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error("Network response was not ok");
       }
 
       const result = await response.json();
-      
+
       // Assuming the API returns { verification: 1 } or { verification: 0 }
       setVerificationResult(result.value === 1);
-      
     } catch (err) {
-      setError('Failed to verify certificate. Please try again.');
-      console.error('Verification error:', err);
+      setError("Failed to verify certificate. Please try again.");
+      console.error("Verification error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -61,12 +67,12 @@ export default function CertificateVerifier() {
 
   const resetForm = () => {
     setFormData({
-      holderName: '',
-      domainName: '',
-      issueDate: ''
+      holderName: "",
+      domainName: "",
+      issueDate: "",
     });
     setVerificationResult(null);
-    setError('');
+    setError("");
   };
 
   return (
@@ -76,14 +82,21 @@ export default function CertificateVerifier() {
           {/* Header */}
           <div className="text-center mb-6">
             <Shield className="mx-auto h-12 w-12 text-blue-600 mb-2" />
-            <h1 className="text-2xl font-bold text-gray-900">Certificate Verification</h1>
-            <p className="text-gray-600 mt-1">Verify the authenticity of your certificate</p>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Certificate Verification
+            </h1>
+            <p className="text-gray-600 mt-1">
+              Verify the authenticity of your certificate
+            </p>
           </div>
 
           {/* Form */}
           <div className="space-y-4">
             <div>
-              <label htmlFor="holderName" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="holderName"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Certificate Holder Name
               </label>
               <input
@@ -98,7 +111,10 @@ export default function CertificateVerifier() {
             </div>
 
             <div>
-              <label htmlFor="domainName" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="domainName"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Holder's Domain
               </label>
               <input
@@ -113,7 +129,10 @@ export default function CertificateVerifier() {
             </div>
 
             <div>
-              <label htmlFor="issueDate" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="issueDate"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Issue Date
               </label>
               <input
@@ -136,11 +155,13 @@ export default function CertificateVerifier() {
 
           {/* Verification Result */}
           {verificationResult !== null && (
-            <div className={`mt-4 p-4 rounded-lg border-2 ${
-              verificationResult 
-                ? 'bg-green-50 border-green-200' 
-                : 'bg-red-50 border-red-200'
-            }`}>
+            <div
+              className={`mt-4 p-4 rounded-lg border-2 ${
+                verificationResult
+                  ? "bg-green-50 border-green-200"
+                  : "bg-red-50 border-red-200"
+              }`}
+            >
               <div className="flex items-center">
                 {verificationResult ? (
                   <CheckCircle className="h-6 w-6 text-green-600 mr-2" />
@@ -148,18 +169,23 @@ export default function CertificateVerifier() {
                   <XCircle className="h-6 w-6 text-red-600 mr-2" />
                 )}
                 <div>
-                  <h3 className={`font-semibold ${
-                    verificationResult ? 'text-green-800' : 'text-red-800'
-                  }`}>
-                    {verificationResult ? 'Certificate Verified' : 'Certificate Not Verified'}
+                  <h3
+                    className={`font-semibold ${
+                      verificationResult ? "text-green-800" : "text-red-800"
+                    }`}
+                  >
+                    {verificationResult
+                      ? "Certificate Verified"
+                      : "Certificate Not Verified"}
                   </h3>
-                  <p className={`text-sm ${
-                    verificationResult ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {verificationResult 
-                      ? 'This certificate is genuine and valid.'
-                      : 'This certificate could not be verified or is invalid.'
-                    }
+                  <p
+                    className={`text-sm ${
+                      verificationResult ? "text-green-600" : "text-red-600"
+                    }`}
+                  >
+                    {verificationResult
+                      ? "This certificate is genuine and valid."
+                      : "This certificate could not be verified or is invalid."}
                   </p>
                 </div>
               </div>
@@ -179,7 +205,7 @@ export default function CertificateVerifier() {
                   Verifying...
                 </>
               ) : (
-                'Verify Certificate'
+                "Verify Certificate"
               )}
             </button>
 
@@ -196,7 +222,9 @@ export default function CertificateVerifier() {
         <div className="mt-6 bg-white rounded-lg p-4 shadow-sm">
           <h3 className="font-medium text-gray-900 mb-2">How to use:</h3>
           <ul className="text-sm text-gray-600 space-y-1">
-            <li>• Enter the certificate ID exactly as shown on your certificate</li>
+            <li>
+              • Enter the certificate ID exactly as shown on your certificate
+            </li>
             <li>• Provide the full name of the certificate holder</li>
             <li>• Select the date when the certificate was issued</li>
             <li>• Click "Verify Certificate" to check authenticity</li>

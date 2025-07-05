@@ -105,9 +105,10 @@ const setupThreeJS = (mountElement: HTMLDivElement) => {
 };
 
 export const Login: React.FC = () => {
-  const [view, setView] = useState<'student-login' | 'admin-login' | 'register' | 'forgot-password'>('student-login');
+  const [view, setView] = useState<'employee-login' | 'student-login' | 'admin-login' | 'register' | 'forgot-password'>('student-login');
   const mountRef = useRef<HTMLDivElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [box, setBox]=useState('student');
 
   useEffect(() => {
     let cleanup: () => void;
@@ -228,7 +229,10 @@ export const Login: React.FC = () => {
 
         <div className={`flex flex-wrap justify-center gap-4 mb-12 ${isLoaded ? 'buttons-animation' : 'opacity-0'}`}>
           <button
-            onClick={() => changeView('student-login')}
+            onClick={() => {
+              changeView('student-login')
+              setBox('student');
+            }}
             className={`flex items-center px-6 py-3 rounded-full btn-hover ${
               view === 'student-login'
                 ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30 btn-primary'
@@ -237,6 +241,21 @@ export const Login: React.FC = () => {
           >
             <GraduationCap className="w-5 h-5 mr-2" />
             Student Login
+          </button>
+
+          <button
+            onClick={() => {
+              changeView('employee-login');
+              setBox('employee');
+            }}
+            className={`flex items-center px-6 py-3 rounded-full btn-hover ${
+              view === 'employee-login'
+                ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30 btn-primary'
+                : 'bg-black/80 border-2 border-gray-700 text-gray-300 btn-secondary'
+            }`}
+          >
+            <GraduationCap className="w-5 h-5 mr-2" />
+            Employee Login
           </button>
           
           <button
@@ -255,6 +274,15 @@ export const Login: React.FC = () => {
         </div>
  
         <div className={`flex justify-center ${viewTransition ? 'view-exit' : isLoaded ? 'view-enter' : 'opacity-0'}`}>
+          {view === 'employee-login' && (
+            <div className="content-animation">
+              <LoginForm
+                type="employee"
+                onRegisterClick={() => changeView('register')}
+                onForgotPassword={() => changeView('forgot-password')}
+              />
+            </div>
+          )}
           {view === 'student-login' && (
             <div className="content-animation">
               <LoginForm
@@ -274,7 +302,8 @@ export const Login: React.FC = () => {
           }
           {view === 'register' && (
             <div className="content-animation">
-              <RegisterForm onLoginClick={() => changeView('student-login')} />
+              {box==='student' && (<RegisterForm onLoginClick={() => changeView('student-login')} reg={box} />)}
+              {box==='employee' && (<RegisterForm onLoginClick={() => changeView('employee-login')}  reg={box}/>)}
             </div>
           )}
 

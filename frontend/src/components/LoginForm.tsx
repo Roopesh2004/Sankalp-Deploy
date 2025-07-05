@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { LogIn, ArrowRight } from 'lucide-react';
 
 interface LoginFormProps {
-  type: 'student' | 'admin';
+  type: 'student' | 'admin' | 'employee';
   onRegisterClick?: () => void;
   onForgotPassword?: () => void;
 }
@@ -16,14 +16,19 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
-  const { login, loading, error } = useAuth();
+  const { login, loading, error, employee_login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
     
     try {
-      await login(email, password);
+      if(type==='student' || type ==='admin'){
+        await login(email, password);
+      }else{
+        await employee_login(email, password);
+      }
+      
       // If login is successful, you might want to redirect the user
     } catch (err) {
       setFormError((err as Error).message || 'Login failed. Please try again.');
@@ -123,7 +128,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           </div>
           <h2 className="ml-3 text-2xl font-bold text-white">
             <span className="text-primary-400">
-              {type === 'admin' ? 'Admin' : 'Student'} <span className="text-white">Login</span>
+              {type === 'admin' ? 'Admin' : type === 'student' ? 'Student': 'Employee'} <span className="text-white">Login</span>
             </span>
           </h2>
         </div>
@@ -197,6 +202,19 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               Register
             </button>
           )}
+
+
+          {type === 'employee' && onRegisterClick && (
+            <button
+              type="button"
+              onClick={onRegisterClick}
+              className="border-2 border-gray-700 text-gray-300 px-5 py-2 rounded-full font-medium btn-secondary"
+            >
+              Register
+            </button>
+          )}
+
+          
         </div>
       </form>
     </div>
