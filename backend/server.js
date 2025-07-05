@@ -1548,21 +1548,25 @@ app.get('/api/user-course-modules/:userId/:courseId', async (req, res) => {
 
     const connection = await pool.getConnection();
 
-    // Verify user-course access
-    const [access] = await connection.execute(
-      `SELECT * FROM user_courses WHERE userId = ? AND courseId = ?`,
+    // Fetch user-course record including accessGranted
+    const [accessResult] = await connection.execute(
+      `SELECT accessGranted FROM user_courses WHERE userId = ? AND courseId = ?`,
       [userId, courseId]
     );
 
-    if (access.length === 0) {
+    if (accessResult.length === 0) {
       connection.release();
       return res.status(403).json({ message: 'Access not granted for this course' });
     }
 
-    // Fetch modules
+    const accessGranted = new Date(accessResult[0].accessGranted);
+    const now = new Date();
+    const weeksPassed = Math.floor((now - accessGranted) / (7 * 24 * 60 * 60 * 1000));
+
+    // Fetch modules for weeks user has access to
     const [modules] = await connection.execute(
-      `SELECT * FROM course_modules WHERE courseId = ? ORDER BY week ASC, day ASC`,
-      [courseId]
+      `SELECT * FROM course_modules WHERE courseId = ? AND week <= ? ORDER BY week ASC, day ASC`,
+      [courseId, weeksPassed + 1]  // +1 if you want current week included
     );
 
     connection.release();
@@ -1743,6 +1747,52 @@ app.get('/api/secure-video-mobile/:moduleId', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
+
+// Backend (Express)
+app.get('/api/recommend-courses/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const connection = await pool.getConnection();
+
+    // Get all courseIds that the user is already enrolled in
+    const [enrolled] = await connection.execute(
+      `SELECT courseId FROM user_courses WHERE userId = ?`,
+      [userId]
+    );
+
+    const enrolledCourseIds = enrolled.map(row => row.courseId);
+
+    // Build the query dynamically
+    let recommendedQuery = `SELECT id, title, description FROM courses`;
+    let params = [];
+
+    if (enrolledCourseIds.length > 0) {
+      const placeholders = enrolledCourseIds.map(() => '?').join(', ');
+      recommendedQuery += ` WHERE id NOT IN (${placeholders})`;
+      params = enrolledCourseIds;
+    }
+
+    recommendedQuery += ` ORDER BY RAND() LIMIT 3`;
+
+    const [recommended] = await connection.execute(recommendedQuery, params);
+
+    connection.release();
+
+    res.status(200).json({
+      success: true,
+      data: recommended,
+    });
+  } catch (error) {
+    console.error('Error recommending courses:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch recommended courses',
+      error: error.message,
+    });
+  }
+});
+
 
 // Start server
 const PORT = process.env.PORT || 5000;
