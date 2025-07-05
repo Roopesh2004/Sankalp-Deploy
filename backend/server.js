@@ -565,7 +565,7 @@ app.post('/api/check-course-access', async (req, res) => {
 
     console.log(userId)
     
-    const [accessRecords]= reg===0 ?
+    const [accessRecords]= reg==="student" ?
       await connection.execute(
         'SELECT * FROM user_courses WHERE userId = ? AND courseId = ?',
         [userId, courseId]
