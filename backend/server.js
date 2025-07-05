@@ -1507,7 +1507,75 @@ app.post('/api/verify-certificate', async (req, res) => {
   }
 });
 
+app.get('/api/user-courses/:userId', async (req, res) => {
+  const { userId } = req.params;
 
+  try {
+    if (!userId || isNaN(userId)) {
+      return res.status(400).json({ message: 'Invalid user ID' });
+    }
+
+    const connection = await pool.getConnection();
+
+    // Fetch all courses the user is registered for
+    const [courses] = await connection.execute(
+      `SELECT c.id, c.title, c.description, c.thumbnail, c.syllabus
+       FROM user_courses uc
+       JOIN courses c ON uc.courseId = c.id
+       WHERE uc.userId = ?`,
+      [userId]
+    );
+
+    connection.release();
+    console.log(courses);
+    res.status(200).json({
+      success: true,
+      data : courses
+    });
+  } catch (error) {
+    console.error('Error fetching user courses:', error);
+    res.status(500).json({ message: 'Failed to retrieve user courses', error: error.message });
+  }
+});
+
+app.get('/api/user-course-modules/:userId/:courseId', async (req, res) => {
+  const { userId, courseId } = req.params;
+
+  try {
+    if (!userId || isNaN(userId) || !courseId || isNaN(courseId)) {
+      return res.status(400).json({ message: 'Invalid user or course ID' });
+    }
+
+    const connection = await pool.getConnection();
+
+    // Verify user-course access
+    const [access] = await connection.execute(
+      `SELECT * FROM user_courses WHERE userId = ? AND courseId = ?`,
+      [userId, courseId]
+    );
+
+    if (access.length === 0) {
+      connection.release();
+      return res.status(403).json({ message: 'Access not granted for this course' });
+    }
+
+    // Fetch modules
+    const [modules] = await connection.execute(
+      `SELECT * FROM course_modules WHERE courseId = ? ORDER BY week ASC, day ASC`,
+      [courseId]
+    );
+
+    connection.release();
+
+    res.status(200).json({
+      success: true,
+      data: modules
+    });
+  } catch (error) {
+    console.error('Error fetching course modules:', error);
+    res.status(500).json({ message: 'Failed to retrieve modules', error: error.message });
+  }
+});
 
 // Start server
 const PORT = process.env.PORT || 5000;
