@@ -1548,21 +1548,25 @@ app.get('/api/user-course-modules/:userId/:courseId', async (req, res) => {
 
     const connection = await pool.getConnection();
 
-    // Verify user-course access
-    const [access] = await connection.execute(
-      `SELECT * FROM user_courses WHERE userId = ? AND courseId = ?`,
+    // Fetch user-course record including accessGranted
+    const [accessResult] = await connection.execute(
+      `SELECT accessGranted FROM user_courses WHERE userId = ? AND courseId = ?`,
       [userId, courseId]
     );
 
-    if (access.length === 0) {
+    if (accessResult.length === 0) {
       connection.release();
       return res.status(403).json({ message: 'Access not granted for this course' });
     }
 
-    // Fetch modules
+    const accessGranted = new Date(accessResult[0].accessGranted);
+    const now = new Date();
+    const weeksPassed = Math.floor((now - accessGranted) / (7 * 24 * 60 * 60 * 1000));
+
+    // Fetch modules for weeks user has access to
     const [modules] = await connection.execute(
-      `SELECT * FROM course_modules WHERE courseId = ? ORDER BY week ASC, day ASC`,
-      [courseId]
+      `SELECT * FROM course_modules WHERE courseId = ? AND week <= ? ORDER BY week ASC, day ASC`,
+      [courseId, weeksPassed + 1]  // +1 if you want current week included
     );
 
     connection.release();
