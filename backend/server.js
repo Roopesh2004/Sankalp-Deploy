@@ -1577,6 +1577,160 @@ app.get('/api/user-course-modules/:userId/:courseId', async (req, res) => {
   }
 });
 
+
+app.post('/api/generate-video-token-mobile', async (req, res) => {
+  const { userId, moduleId } = req.body;
+  console.log(`Generating video token for userId: ${userId}, moduleId: ${moduleId}`);
+  if (!userId || !moduleId) {
+    return res.status(400).json({ message: 'userId and moduleId are required' });
+  }
+
+  let connection;
+  try {
+    connection = await pool.getConnection();
+
+    // 1. Fetch module → get courseId & videoUrl
+    const [mods] = await connection.execute(
+      'SELECT courseId, videoUrl FROM course_modules WHERE id = ?',
+      [moduleId]
+    );
+    if (mods.length === 0) {
+      return res.status(404).json({ message: 'Module not found' });
+    }
+    const { courseId, videoUrl } = mods[0];
+
+    // 2. Check user-course access
+    const [access] = await connection.execute(
+      'SELECT 1 FROM user_courses WHERE userId = ? AND courseId = ? LIMIT 1',
+      [userId, courseId]
+    );
+    if (access.length === 0) {
+      return res.status(403).json({ message: 'No access to this course' });
+    }
+
+    // 3. Issue the token
+    const token = jwt.sign(
+      { userId, moduleId },
+      JWT_SECRET,
+      { expiresIn: VIDEO_TOKEN_EXPIRY }
+    );
+
+    console.log(`Token generated for userId: ${userId}, moduleId: ${moduleId} , token: ${token}`);
+    return res.json({ success: true, token });
+
+  } catch (err) {
+    console.error('Error in generate-video-token-mobile:', err);
+    return res.status(500).json({ message: 'Server error' });
+  } finally {
+    if (connection) connection.release();
+  }
+});
+
+
+
+app.get('/api/secure-video-mobile/:moduleId', async (req, res) => {
+  try {
+    const { moduleId } = req.params;
+    const { token } = req.query;
+
+    if (!moduleId || !token) return res.status(400).send('Module ID and token are required');
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (error) {
+      return res.status(403).send('Access denied: Invalid or expired token');
+    }
+
+    const { userId, moduleId: tokenModuleId } = decoded;
+    if (parseInt(moduleId) !== parseInt(tokenModuleId))
+      return res.status(403).send('Access denied: Token not valid for this video');
+
+    const connection = await pool.getConnection();
+
+    const [[userRow]] = await connection.execute(
+      'SELECT email FROM students WHERE id = ?',
+      [userId]
+    );
+    if (!userRow) {
+      connection.release();
+      return res.status(403).send('User not found');
+    }
+
+    const [[module]] = await connection.execute(
+      'SELECT videoUrl FROM course_modules WHERE id = ?',
+      [moduleId]
+    );
+    connection.release();
+
+    if (!module || !module.videoUrl) return res.status(404).send('Video not found');
+
+    const match = module.videoUrl.match(/(?:youtube\.com\/.*[?&]v=|youtu\.be\/)([^"&?\/\s]{11})/);
+    if (!match || !match[1]) return res.status(400).send('Invalid YouTube URL');
+
+    const videoId = match[1];
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Secure YouTube Player</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: black;
+    }
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .block-top,
+    .block-bottom {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 7%;
+      background: transparent;
+      z-index: 10;
+    }
+    .block-top { top: 0; }
+    .block-bottom { bottom: 0; }
+  </style>
+</head>
+<body>
+  <div class="video-wrapper">
+    <iframe
+      src="https://www.youtube.com/embed/${videoId}?controls=1&modestbranding=1&rel=0&fs=1&playsinline=1"
+      allowfullscreen
+      allow="autoplay; encrypted-media"
+    ></iframe>
+    <div class="block-top"></div>
+    <div class="block-bottom"></div>
+  </div>
+</body>
+</html>
+    `;
+
+    res.setHeader('Content-Type', 'text/html');
+    res.setHeader('Cache-Control', 'no-store');
+    res.send(html);
+  } catch (error) {
+    console.error('Secure video iframe error:', error);
+    res.status(500).send('Server error');
+  }
+});
+
+
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
