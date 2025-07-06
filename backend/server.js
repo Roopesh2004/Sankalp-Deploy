@@ -1712,7 +1712,7 @@ app.get('/api/secure-video-mobile/:moduleId', async (req, res) => {
     @media (orientation: portrait) {
       .block-top,
       .block-bottom {
-        height: 9%;
+        height: 8%;
       }
     }
 
