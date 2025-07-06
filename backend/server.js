@@ -1793,6 +1793,14 @@ app.get('/api/recommend-courses/:userId', async (req, res) => {
   }
 });
 
+app.post('/api/logout', (req, res) => {
+  // If you're using JWTs or cookies, you could invalidate them here
+  console.log('User logged out');
+  res.status(200).json({ message: 'Logout successful' });
+});
+
+
+
 
 // Start server
 const PORT = process.env.PORT || 5000;
