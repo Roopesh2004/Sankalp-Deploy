@@ -1800,6 +1800,63 @@ app.post('/api/logout', (req, res) => {
 });
 
 
+app.post('/api/forgot-password-mobile', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email is required' });
+    }
+
+    // Check if user exists
+    const connection = await pool.getConnection();
+    const [users] = await connection.execute(
+      'SELECT * FROM students WHERE email = ?',
+      [email]
+    );
+
+    connection.release();
+
+    if (users.length === 0) {
+      return res.status(404).json({ success: false, message: 'No account found with this email' });
+    }
+
+    // Generate a 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiry = Date.now() + OTP_EXPIRY;
+
+    // Store OTP with expiry
+    otpStore.set(email, { otp, expiry });
+
+    // Send OTP via email
+    const mailOptions = {
+      from: process.env.EMAIL_FROM,
+      to: email,
+      subject: 'Password Reset OTP',
+      html: `
+        <h1>Password Reset Request</h1>
+        <p>Your OTP for password reset is: <strong>${otp}</strong></p>
+        <p>This OTP will expire in 10 minutes.</p>
+        <p>If you didn't request this, please ignore this email.</p>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    // ✅ Send structured success response
+    res.json({ success: true, message: 'OTP sent to your email' });
+
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to process request',
+      error: error.message,
+    });
+  }
+});
+
+
 
 
 // Start server
