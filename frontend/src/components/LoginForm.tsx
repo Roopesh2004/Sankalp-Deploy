@@ -8,10 +8,10 @@ interface LoginFormProps {
   onForgotPassword?: () => void;
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({ 
-  type, 
+export const LoginForm: React.FC<LoginFormProps> = ({
+  type,
   onRegisterClick,
-  onForgotPassword 
+  onForgotPassword,
 }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,18 +21,24 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
-    
+
     try {
-      if(type==='student' || type ==='admin'){
+      if (type === 'student' || type === 'admin') {
         await login(email, password);
-      }else{
+      } else if (type === 'employee') {
         await employee_login(email, password);
       }
-      
-      // If login is successful, you might want to redirect the user
+      // On success, redirect or perform any action needed
     } catch (err) {
       setFormError((err as Error).message || 'Login failed. Please try again.');
     }
+  };
+
+  // Helper to get the correct label
+  const getTypeLabel = () => {
+    if (type === 'admin') return 'Admin';
+    if (type === 'employee') return 'Employee';
+    return 'Student';
   };
 
   return (
@@ -42,44 +48,35 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        
         .form-container {
           animation: slideInUp 0.5s ease-out forwards;
         }
-        
         .input-group {
           opacity: 0;
           transform: translateY(10px);
         }
-        
         .input-group-1 { animation: slideInUp 0.4s ease-out 0.2s forwards; }
         .input-group-2 { animation: slideInUp 0.4s ease-out 0.3s forwards; }
         .button-group { animation: slideInUp 0.4s ease-out 0.4s forwards; }
-        
         .icon-container {
           transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        
         .icon-container:hover {
           transform: scale(1.05);
           box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
         }
-        
         .btn-primary {
           position: relative;
           overflow: hidden;
           transition: transform 0.2s ease, box-shadow 0.3s ease;
         }
-        
         .btn-primary:hover {
           transform: scale(1.05);
           box-shadow: 0 0 25px rgba(124, 58, 237, 0.5);
         }
-        
         .btn-primary:active {
           transform: scale(0.95);
         }
-        
         .btn-primary::before {
           content: '';
           position: absolute;
@@ -90,57 +87,64 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           background: rgba(255, 255, 255, 0.3);
           transition: transform 0.5s ease;
         }
-        
         .btn-primary:hover::before {
           transform: translateX(200%);
         }
-        
         .btn-secondary {
           transition: transform 0.2s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
         }
-        
         .btn-secondary:hover {
           transform: scale(1.05);
           border-color: rgb(124, 58, 237);
           color: rgb(167, 139, 250);
           box-shadow: 0 0 15px rgba(124, 58, 237, 0.2);
         }
-        
         .btn-secondary:active {
           transform: scale(0.95);
         }
-        
         @keyframes arrowMove {
           0% { transform: translateX(0); }
           50% { transform: translateX(5px); }
           100% { transform: translateX(0); }
         }
-        
         .arrow-animation {
           animation: arrowMove 1s infinite;
         }
       `}</style>
-    
-      <form onSubmit={handleSubmit} className="form-container bg-black/80 backdrop-blur-lg border border-gray-800 p-8 rounded-2xl shadow-xl">
-        <div className="flex items-center justify-center mb-8 opacity-0" style={{ animation: 'slideInUp 0.5s ease-out 0.1s forwards' }}>
+
+      <form
+        onSubmit={handleSubmit}
+        className="form-container bg-black/80 backdrop-blur-lg border border-gray-800 p-8 rounded-2xl shadow-xl"
+      >
+        <div
+          className="flex items-center justify-center mb-8 opacity-0"
+          style={{ animation: 'slideInUp 0.5s ease-out 0.1s forwards' }}
+        >
           <div className="bg-primary-900/30 p-3 rounded-full icon-container">
             <LogIn className="w-6 h-6 text-primary-300" />
           </div>
           <h2 className="ml-3 text-2xl font-bold text-white">
             <span className="text-primary-400">
-              {type === 'admin' ? 'Admin' : type === 'student' ? 'Student': 'Employee'} <span className="text-white">Login</span>
+              {getTypeLabel()} <span className="text-white">Login</span>
             </span>
           </h2>
         </div>
-        
-        {(formError==="Invalid email or password" || error==="Invalid email or password") && (
-          <div className="mb-6 bg-red-900/20 border border-red-800 text-red-400 px-4 py-3 rounded-lg" style={{ animation: 'slideInUp 0.4s ease-out forwards' }}>
+
+        {(formError === 'Invalid email or password' ||
+          error === 'Invalid email or password') && (
+          <div
+            className="mb-6 bg-red-900/20 border border-red-800 text-red-400 px-4 py-3 rounded-lg"
+            style={{ animation: 'slideInUp 0.4s ease-out forwards' }}
+          >
             {formError || error}
           </div>
         )}
-        
+
         <div className="mb-5 input-group input-group-1">
-          <label className="block text-gray-300 text-sm font-medium mb-2" htmlFor="email">
+          <label
+            className="block text-gray-300 text-sm font-medium mb-2"
+            htmlFor="email"
+          >
             Email
           </label>
           <input
@@ -153,9 +157,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             required
           />
         </div>
-        
+
         <div className="mb-6 input-group input-group-2">
-          <label className="block text-gray-300 text-sm font-medium mb-2" htmlFor="password">
+          <label
+            className="block text-gray-300 text-sm font-medium mb-2"
+            htmlFor="password"
+          >
             Password
           </label>
           <input
@@ -168,9 +175,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             required
           />
         </div>
-        
+
         {onForgotPassword && (
-          <div className="flex justify-end mb-4 opacity-0" style={{ animation: 'slideInUp 0.4s ease-out 0.3s forwards' }}>
+          <div
+            className="flex justify-end mb-4 opacity-0"
+            style={{ animation: 'slideInUp 0.4s ease-out 0.3s forwards' }}
+          >
             <button
               type="button"
               onClick={onForgotPassword}
@@ -180,20 +190,20 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             </button>
           </div>
         )}
-        
+
         <div className="flex items-center justify-between mt-8 opacity-0 input-group button-group">
           <button
             className="bg-primary-600 text-white px-6 py-3 rounded-full font-medium flex items-center justify-center gap-2 btn-primary"
             type="submit"
             disabled={loading}
           >
-            {loading ? 'Signing In...' : 'Sign In'} 
+            {loading ? 'Signing In...' : 'Sign In'}
             <span className="arrow-animation">
               <ArrowRight size={18} />
             </span>
           </button>
-          
-          {type === 'student' && onRegisterClick && (
+
+          {(type === 'student' || type === 'employee') && onRegisterClick && (
             <button
               type="button"
               onClick={onRegisterClick}
@@ -202,19 +212,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               Register
             </button>
           )}
-
-
-          {type === 'employee' && onRegisterClick && (
-            <button
-              type="button"
-              onClick={onRegisterClick}
-              className="border-2 border-gray-700 text-gray-300 px-5 py-2 rounded-full font-medium btn-secondary"
-            >
-              Register
-            </button>
-          )}
-
-          
         </div>
       </form>
     </div>
