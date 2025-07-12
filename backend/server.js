@@ -1548,7 +1548,7 @@ app.get('/api/user-course-modules/:userId/:courseId', async (req, res) => {
 
     const connection = await pool.getConnection();
 
-    // Fetch user-course record including accessGranted
+    // Step 1: Check user-course access
     const [accessResult] = await connection.execute(
       `SELECT accessGranted FROM user_courses WHERE userId = ? AND courseId = ?`,
       [userId, courseId]
@@ -1563,17 +1563,50 @@ app.get('/api/user-course-modules/:userId/:courseId', async (req, res) => {
     const now = new Date();
     const weeksPassed = Math.floor((now - accessGranted) / (7 * 24 * 60 * 60 * 1000));
 
-    // Fetch modules for weeks user has access to
-    const [modules] = await connection.execute(
-      `SELECT * FROM course_modules WHERE courseId = ? AND week <= ? ORDER BY week ASC, day ASC`,
-      [courseId, weeksPassed + 1]  // +1 if you want current week included
+    // Step 2: Fetch modules and materials using LEFT JOIN
+    const [rows] = await connection.execute(
+      `
+      SELECT 
+        m.*, 
+        mat.id AS materialId, 
+        mat.material 
+      FROM course_modules m
+      LEFT JOIN module_materials mat 
+        ON mat.moduleId = m.id AND mat.courseId = m.courseId
+      WHERE m.courseId = ? AND m.week <= ?
+      ORDER BY m.week ASC, m.day ASC
+      `,
+      [courseId, weeksPassed + 1]
     );
 
     connection.release();
 
+    // Step 3: Group materials under each module
+    const modules = {};
+    for (const row of rows) {
+      if (!modules[row.id]) {
+        modules[row.id] = {
+          id: row.id,
+          courseId: row.courseId,
+          title: row.title,
+          week: row.week,
+          day: row.day,
+          videoUrl: row.videoUrl,
+          materials: []
+        };
+      }
+
+      if (row.materialId) {
+        modules[row.id].materials.push({
+          id: row.materialId,
+          material: row.material
+        });
+      }
+    }
+    console.log(modules)
     res.status(200).json({
       success: true,
-      data: modules
+      data: Object.values(modules)
     });
   } catch (error) {
     console.error('Error fetching course modules:', error);
@@ -1855,6 +1888,55 @@ app.post('/api/forgot-password-mobile', async (req, res) => {
     });
   }
 });
+
+
+
+app.get('/api/recommend-courses-all/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const connection = await pool.getConnection();
+
+    // Get all courseIds the user is already enrolled in
+    const [enrolled] = await connection.execute(
+      `SELECT courseId FROM user_courses WHERE userId = ?`,
+      [userId]
+    );
+
+    const enrolledCourseIds = enrolled.map(row => row.courseId);
+
+    let query = `SELECT id, title, description FROM courses`;
+    let params = [];
+
+    if (enrolledCourseIds.length > 0) {
+      const placeholders = enrolledCourseIds.map(() => '?').join(', ');
+      query += ` WHERE id NOT IN (${placeholders})`;
+      params = enrolledCourseIds;
+    }
+
+    // Optional: random order
+    query += ` ORDER BY RAND()`;
+
+    const [unregistered] = await connection.execute(query, params);
+
+    connection.release();
+
+    res.status(200).json({
+      success: true,
+      data: unregistered,
+    });
+  } catch (error) {
+    console.error('Error fetching unregistered courses:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch unregistered courses',
+      error: error.message,
+    });
+  }
+});
+
+
+
 
 
 
