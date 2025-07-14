@@ -6,6 +6,9 @@ const bcrypt = require('bcryptjs');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const { spawn } = require('child_process');
+const fs = require('fs');
+const path = require('path');
 
 // Load environment variables
 dotenv.config();
@@ -356,11 +359,13 @@ app.post('/api/login', async (req, res) => {
       connection.release();
       
       if (pendingRecords.length > 0) {
+        console.log("Found")
         return res.json({
           message: 'Registration status found',
           value: pendingRecords[0]
         });
       } else {
+        console.log("Not Found")
         return res.json({
           message: 'No registration found',
           value: -1
@@ -1360,11 +1365,13 @@ app.post('/api/verify-certificate', async (req, res) => {
       connection.release();
 
       if (pendingRecords.length == 1) {
+        // console.log("Found")
         return res.json({
           message: 'Registration status found',
           value: pendingRecords[0].status
         });
       } else {
+        // console.log("Not found")
         return res.json({
           message: 'No registration found',
           value: -1
@@ -1508,6 +1515,121 @@ app.post('/api/verify-certificate', async (req, res) => {
 });
 
 
+
+// Certificate generation endpoint
+app.post('/api/generate-certificate', async (req, res) => {
+  try {
+    const { name, domain, start_date, end_date, gender } = req.body;
+
+    // Validate input
+    if (!name || !domain || !start_date || !end_date) {
+      return res.status(400).json({
+        message: 'Missing required fields: name, domain, start_date, end_date'
+      });
+    }
+
+    // Prepare data for Python script
+    const certificateData = {
+      name,
+      domain,
+      start_date,
+      end_date,
+      gender: gender || 'other'
+    };
+
+    // Execute Python script
+    const python = spawn('python', ['generate_certificate.py'], {
+      cwd: __dirname,
+      stdio: ['pipe', 'pipe', 'pipe']
+    });
+
+    // Send data to Python script
+    python.stdin.write(JSON.stringify(certificateData));
+    python.stdin.end();
+
+    let output = '';
+    let errorOutput = '';
+
+    python.stdout.on('data', (data) => {
+      output += data.toString();
+    });
+
+    python.stderr.on('data', (data) => {
+      errorOutput += data.toString();
+    });
+
+    python.on('close', async (code) => {
+      if (code !== 0) {
+        console.error('Python script error:', errorOutput);
+        return res.status(500).json({
+          message: 'Failed to generate certificate',
+          error: errorOutput
+        });
+      }
+
+      try {
+        const result = JSON.parse(output);
+
+        if (!result.success) {
+          return res.status(500).json({
+            message: 'Certificate generation failed',
+            error: result.error
+          });
+        }
+
+        // Check if PDF file exists
+        const pdfPath = path.join(__dirname, result.pdf_path);
+        if (!fs.existsSync(pdfPath)) {
+          return res.status(500).json({
+            message: 'Generated certificate file not found'
+          });
+        }
+
+        // Store certificate info in database
+        try {
+          const connection = await pool.getConnection();
+          const issued_date = new Date().toISOString().split('T')[0];
+
+          await connection.execute(
+            'INSERT INTO certificates (name, domain, status, issueDate) VALUES (?, ?, ?, ?)',
+            [name, domain, 1, issued_date]
+          );
+          connection.release();
+        } catch (dbError) {
+          console.error('Database error:', dbError);
+          // Continue with file sending even if database insert fails
+        }
+
+        // Send PDF file
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${name}_Certificate.pdf"`);
+
+        const fileStream = fs.createReadStream(pdfPath);
+        fileStream.pipe(res);
+
+        // Clean up the file after sending
+        fileStream.on('end', () => {
+          fs.unlink(pdfPath, (err) => {
+            if (err) console.error('Error deleting certificate file:', err);
+          });
+        });
+
+      } catch (parseError) {
+        console.error('Error parsing Python script output:', parseError);
+        return res.status(500).json({
+          message: 'Failed to process certificate generation result'
+        });
+      }
+    });
+
+  } catch (error) {
+    console.error('Certificate generation error:', error);
+    res.status(500).json({
+      message: 'Certificate generation failed',
+      error: error.message
+    });
+  }
+});
 
 // Start server
 const PORT = process.env.PORT || 5000;
