@@ -28,6 +28,18 @@ except ImportError:
     DOCX2PDF_AVAILABLE = False
     logger.warning("docx2pdf not available. PDF conversion may not work.")
 
+# Try to import reportlab for fallback PDF generation
+try:
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.pagesizes import letter, A4
+    from reportlab.lib.styles import getSampleStyleSheet
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+    REPORTLAB_AVAILABLE = True
+    logger.info("reportlab library loaded successfully")
+except ImportError:
+    REPORTLAB_AVAILABLE = False
+    logger.warning("reportlab not available. Fallback PDF generation may not work.")
+
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
@@ -37,6 +49,8 @@ def convert_with_libreoffice(input_docx, output_pdf):
     Returns True if successful, False otherwise
     """
     try:
+        logger.info(f"Attempting LibreOffice conversion: {input_docx} -> {output_pdf}")
+
         # Try different LibreOffice executable names
         libreoffice_commands = [
             'libreoffice',
@@ -48,6 +62,8 @@ def convert_with_libreoffice(input_docx, output_pdf):
 
         for cmd in libreoffice_commands:
             try:
+                logger.info(f"Trying LibreOffice command: {cmd}")
+
                 # Run LibreOffice in headless mode to convert DOCX to PDF
                 result = subprocess.run([
                     cmd,
@@ -57,22 +73,99 @@ def convert_with_libreoffice(input_docx, output_pdf):
                     input_docx
                 ], capture_output=True, text=True, timeout=30)
 
+                logger.info(f"LibreOffice command result: return_code={result.returncode}")
+                if result.stdout:
+                    logger.info(f"LibreOffice stdout: {result.stdout}")
+                if result.stderr:
+                    logger.warning(f"LibreOffice stderr: {result.stderr}")
+
                 if result.returncode == 0:
                     # LibreOffice creates PDF with same name as input but .pdf extension
                     expected_pdf = os.path.splitext(input_docx)[0] + '.pdf'
+                    logger.info(f"Looking for generated PDF: {expected_pdf}")
+
                     if os.path.exists(expected_pdf):
+                        logger.info(f"PDF generated successfully: {expected_pdf}")
                         # Rename to desired output name if different
                         if expected_pdf != output_pdf:
+                            logger.info(f"Renaming {expected_pdf} to {output_pdf}")
                             os.rename(expected_pdf, output_pdf)
                         return True
+                    else:
+                        logger.warning(f"Expected PDF not found: {expected_pdf}")
+                        # List files in current directory for debugging
+                        current_files = os.listdir('.')
+                        logger.info(f"Files in current directory: {current_files}")
 
-            except (subprocess.TimeoutExpired, FileNotFoundError):
+            except subprocess.TimeoutExpired:
+                logger.warning(f"LibreOffice command timed out: {cmd}")
+                continue
+            except FileNotFoundError:
+                logger.warning(f"LibreOffice command not found: {cmd}")
                 continue
 
+        logger.error("All LibreOffice commands failed")
         return False
 
     except Exception as e:
-        print(f"LibreOffice conversion error: {e}")
+        logger.error(f"LibreOffice conversion error: {e}")
+        return False
+
+def convert_with_reportlab(input_docx, output_pdf, name, domain, start_date, end_date, gender):
+    """
+    Fallback PDF generation using reportlab
+    Creates a simple certificate PDF when other methods fail
+    """
+    if not REPORTLAB_AVAILABLE:
+        logger.error("reportlab not available for fallback conversion")
+        return False
+
+    try:
+        logger.info(f"Creating fallback PDF with reportlab: {output_pdf}")
+
+        # Create PDF document
+        doc = SimpleDocTemplate(output_pdf, pagesize=A4)
+        styles = getSampleStyleSheet()
+        story = []
+
+        # Title
+        title_style = styles['Title']
+        title = Paragraph("CERTIFICATE OF COMPLETION", title_style)
+        story.append(title)
+        story.append(Spacer(1, 20))
+
+        # Content
+        normal_style = styles['Normal']
+
+        # Determine pronouns
+        pronouns = {"male": ("he", "him"), "female": ("she", "her"), "other": ("they", "them")}
+        he_she, him_her = pronouns.get(gender.lower(), ("they", "them"))
+
+        # Certificate text
+        content = f"""
+        <para align="center">
+        This is to certify that<br/><br/>
+        <b>{name}</b><br/><br/>
+        has successfully completed the training program in<br/><br/>
+        <b>{domain}</b><br/><br/>
+        from {start_date} to {end_date}.<br/><br/>
+        {he_she.capitalize()} has demonstrated proficiency in the subject matter
+        and is hereby awarded this certificate.<br/><br/>
+        Issued on: {datetime.today().strftime('%B %d, %Y')}
+        </para>
+        """
+
+        para = Paragraph(content, normal_style)
+        story.append(para)
+
+        # Build PDF
+        doc.build(story)
+
+        logger.info(f"Fallback PDF created successfully: {output_pdf}")
+        return True
+
+    except Exception as e:
+        logger.error(f"reportlab conversion error: {e}")
         return False
 
 def generate_certificate(name, domain, start_date, end_date, gender):
@@ -141,20 +234,39 @@ def generate_certificate(name, domain, start_date, end_date, gender):
         doc.save(output_docx)
 
         # === Convert to PDF ===
+        logger.info(f"Starting PDF conversion. docx2pdf available: {DOCX2PDF_AVAILABLE}")
+
+        conversion_successful = False
+
         if DOCX2PDF_AVAILABLE:
             try:
+                logger.info("Attempting conversion with docx2pdf")
                 convert(output_docx, output_pdf)
+                logger.info("docx2pdf conversion successful")
+                conversion_successful = True
             except Exception as e:
-                print(f"docx2pdf conversion failed: {e}")
-                # Try alternative method using LibreOffice if available
-                if convert_with_libreoffice(output_docx, output_pdf):
-                    print("Successfully converted using LibreOffice")
-                else:
-                    raise Exception("PDF conversion failed. Both docx2pdf and LibreOffice methods failed.")
-        else:
-            # Try LibreOffice method
-            if not convert_with_libreoffice(output_docx, output_pdf):
-                raise Exception("PDF conversion failed. docx2pdf not available and LibreOffice conversion failed.")
+                logger.warning(f"docx2pdf conversion failed: {e}")
+
+        # Try LibreOffice if docx2pdf failed or is not available
+        if not conversion_successful:
+            logger.info("Falling back to LibreOffice conversion")
+            if convert_with_libreoffice(output_docx, output_pdf):
+                logger.info("Successfully converted using LibreOffice")
+                conversion_successful = True
+            else:
+                logger.warning("LibreOffice conversion failed")
+
+        # Try reportlab fallback if all else fails
+        if not conversion_successful:
+            logger.info("Falling back to reportlab PDF generation")
+            if convert_with_reportlab(output_docx, output_pdf, name, domain, start_date, end_date, gender):
+                logger.info("Successfully created PDF using reportlab fallback")
+                conversion_successful = True
+            else:
+                logger.error("All PDF conversion methods failed")
+
+        if not conversion_successful:
+            raise Exception("PDF conversion failed. All methods (docx2pdf, LibreOffice, reportlab) failed.")
 
         # Clean up the temporary DOCX file
         if os.path.exists(output_docx):
@@ -174,6 +286,7 @@ def health_check():
         "status": "healthy",
         "service": "certificate-generator",
         "docx2pdf_available": DOCX2PDF_AVAILABLE,
+        "reportlab_available": REPORTLAB_AVAILABLE,
         "template_exists": os.path.exists("SpectoV_Cert.docx"),
         "current_directory": os.getcwd(),
         "python_version": platform.python_version(),
