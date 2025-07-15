@@ -195,4 +195,4 @@ if __name__ == '__main__':
     print("Generate certificate: POST http://localhost:5001/generate-certificate")
     
     # Run Flask app on port 5001
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    app.run(host='https://sankalp-deploy-2.onrender.com', port=5001, debug=True)
