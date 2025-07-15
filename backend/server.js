@@ -6,9 +6,7 @@ const bcrypt = require('bcryptjs');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
-const { spawn } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+const fetch = require('node-fetch');
 
 // Load environment variables
 dotenv.config();
@@ -1960,7 +1958,7 @@ app.post('/api/generate-certificate', async (req, res) => {
       });
     }
 
-    // Prepare data for Python script
+    // Prepare data for Flask service
     const certificateData = {
       name,
       domain,
@@ -1969,90 +1967,46 @@ app.post('/api/generate-certificate', async (req, res) => {
       gender: gender || 'other'
     };
 
-    // Execute Python script
-    const python = spawn('python', ['generate_certificate.py'], {
-      cwd: __dirname,
-      stdio: ['pipe', 'pipe', 'pipe']
+    // Call Flask certificate service
+    const FLASK_SERVICE_URL = process.env.FLASK_SERVICE_URL || 'http://localhost:5001';
+
+    const response = await fetch(`${FLASK_SERVICE_URL}/generate-certificate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(certificateData)
     });
 
-    // Send data to Python script
-    python.stdin.write(JSON.stringify(certificateData));
-    python.stdin.end();
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+      return res.status(response.status).json({
+        message: 'Failed to generate certificate',
+        error: errorData.error || 'Flask service error'
+      });
+    }
 
-    let output = '';
-    let errorOutput = '';
+    // Store certificate info in database
+    try {
+      const connection = await pool.getConnection();
+      const issued_date = new Date().toISOString().split('T')[0];
 
-    python.stdout.on('data', (data) => {
-      output += data.toString();
-    });
+      await connection.execute(
+        'INSERT INTO certificates (name, domain, status, issueDate) VALUES (?, ?, ?, ?)',
+        [name, domain, 1, issued_date]
+      );
+      connection.release();
+    } catch (dbError) {
+      console.error('Database error:', dbError);
+      // Continue with file sending even if database insert fails
+    }
 
-    python.stderr.on('data', (data) => {
-      errorOutput += data.toString();
-    });
+    // Forward the PDF response from Flask service
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${name}_Certificate.pdf"`);
 
-    python.on('close', async (code) => {
-      if (code !== 0) {
-        console.error('Python script error:', errorOutput);
-        return res.status(500).json({
-          message: 'Failed to generate certificate',
-          error: errorOutput
-        });
-      }
-
-      try {
-        const result = JSON.parse(output);
-
-        if (!result.success) {
-          return res.status(500).json({
-            message: 'Certificate generation failed',
-            error: result.error
-          });
-        }
-
-        // Check if PDF file exists
-        const pdfPath = path.join(__dirname, result.pdf_path);
-        if (!fs.existsSync(pdfPath)) {
-          return res.status(500).json({
-            message: 'Generated certificate file not found'
-          });
-        }
-
-        // Store certificate info in database
-        try {
-          const connection = await pool.getConnection();
-          const issued_date = new Date().toISOString().split('T')[0];
-
-          await connection.execute(
-            'INSERT INTO certificates (name, domain, status, issueDate) VALUES (?, ?, ?, ?)',
-            [name, domain, 1, issued_date]
-          );
-          connection.release();
-        } catch (dbError) {
-          console.error('Database error:', dbError);
-          // Continue with file sending even if database insert fails
-        }
-
-        // Send PDF file
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${name}_Certificate.pdf"`);
-
-        const fileStream = fs.createReadStream(pdfPath);
-        fileStream.pipe(res);
-
-        // Clean up the file after sending
-        fileStream.on('end', () => {
-          fs.unlink(pdfPath, (err) => {
-            if (err) console.error('Error deleting certificate file:', err);
-          });
-        });
-
-      } catch (parseError) {
-        console.error('Error parsing Python script output:', parseError);
-        return res.status(500).json({
-          message: 'Failed to process certificate generation result'
-        });
-      }
-    });
+    // Pipe the response from Flask service to client
+    response.body.pipe(res);
 
   } catch (error) {
     console.error('Certificate generation error:', error);
