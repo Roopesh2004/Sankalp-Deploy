@@ -202,7 +202,7 @@ const Services = () => {
             animate="visible"
           >
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-violet-400 to-purple-600">
-              Our Courses
+              Program Catalogues
             </span>
           </motion.h2>
           <motion.p 
