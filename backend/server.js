@@ -1967,6 +1967,8 @@ app.post('/api/generate-certificate', async (req, res) => {
       gender: gender || 'other' 
     };
 
+    console.log("Certificate Data: ",certificateData)
+
     // Call Flask certificate service
     const FLASK_SERVICE_URL = process.env.FLASK_SERVICE_URL || 'https://sankalp-deploy-2.onrender.com';
 
@@ -1979,6 +1981,7 @@ app.post('/api/generate-certificate', async (req, res) => {
     });
 
     if (!response.ok) {
+      console.log("Flask sent PDF")
       const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
       return res.status(response.status).json({
         message: 'Failed to generate certificate',
