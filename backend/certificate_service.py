@@ -2,14 +2,78 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from docx import Document
 from datetime import datetime
-from docx2pdf import convert
 import os
-import tempfile
 import uuid
-from werkzeug.utils import secure_filename
+import subprocess
+import platform
+import logging
+import sys
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+logger = logging.getLogger(__name__)
+
+# Try to import docx2pdf, but handle the case where it might not work
+try:
+    from docx2pdf import convert
+    DOCX2PDF_AVAILABLE = True
+    logger.info("docx2pdf library loaded successfully")
+except ImportError:
+    DOCX2PDF_AVAILABLE = False
+    logger.warning("docx2pdf not available. PDF conversion may not work.")
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
+
+def convert_with_libreoffice(input_docx, output_pdf):
+    """
+    Alternative PDF conversion using LibreOffice headless mode
+    Returns True if successful, False otherwise
+    """
+    try:
+        # Try different LibreOffice executable names
+        libreoffice_commands = [
+            'libreoffice',
+            'soffice',
+            '/usr/bin/libreoffice',
+            '/usr/bin/soffice',
+            '/opt/libreoffice/program/soffice'
+        ]
+
+        for cmd in libreoffice_commands:
+            try:
+                # Run LibreOffice in headless mode to convert DOCX to PDF
+                result = subprocess.run([
+                    cmd,
+                    '--headless',
+                    '--convert-to', 'pdf',
+                    '--outdir', os.path.dirname(output_pdf) or '.',
+                    input_docx
+                ], capture_output=True, text=True, timeout=30)
+
+                if result.returncode == 0:
+                    # LibreOffice creates PDF with same name as input but .pdf extension
+                    expected_pdf = os.path.splitext(input_docx)[0] + '.pdf'
+                    if os.path.exists(expected_pdf):
+                        # Rename to desired output name if different
+                        if expected_pdf != output_pdf:
+                            os.rename(expected_pdf, output_pdf)
+                        return True
+
+            except (subprocess.TimeoutExpired, FileNotFoundError):
+                continue
+
+        return False
+
+    except Exception as e:
+        print(f"LibreOffice conversion error: {e}")
+        return False
 
 def generate_certificate(name, domain, start_date, end_date, gender):
     print("Name: ",name)
@@ -77,7 +141,20 @@ def generate_certificate(name, domain, start_date, end_date, gender):
         doc.save(output_docx)
 
         # === Convert to PDF ===
-        convert(output_docx, output_pdf)
+        if DOCX2PDF_AVAILABLE:
+            try:
+                convert(output_docx, output_pdf)
+            except Exception as e:
+                print(f"docx2pdf conversion failed: {e}")
+                # Try alternative method using LibreOffice if available
+                if convert_with_libreoffice(output_docx, output_pdf):
+                    print("Successfully converted using LibreOffice")
+                else:
+                    raise Exception("PDF conversion failed. Both docx2pdf and LibreOffice methods failed.")
+        else:
+            # Try LibreOffice method
+            if not convert_with_libreoffice(output_docx, output_pdf):
+                raise Exception("PDF conversion failed. docx2pdf not available and LibreOffice conversion failed.")
 
         # Clean up the temporary DOCX file
         if os.path.exists(output_docx):
@@ -93,7 +170,31 @@ def generate_certificate(name, domain, start_date, end_date, gender):
 @app.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
-    return jsonify({"status": "healthy", "service": "certificate-generator"})
+    health_info = {
+        "status": "healthy",
+        "service": "certificate-generator",
+        "docx2pdf_available": DOCX2PDF_AVAILABLE,
+        "template_exists": os.path.exists("SpectoV_Cert.docx"),
+        "current_directory": os.getcwd(),
+        "python_version": platform.python_version(),
+        "platform": platform.system()
+    }
+
+    # Check LibreOffice availability
+    libreoffice_available = False
+    libreoffice_commands = ['libreoffice', 'soffice', '/usr/bin/libreoffice', '/usr/bin/soffice']
+    for cmd in libreoffice_commands:
+        try:
+            result = subprocess.run([cmd, '--version'], capture_output=True, text=True, timeout=5)
+            if result.returncode == 0:
+                libreoffice_available = True
+                break
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            continue
+
+    health_info["libreoffice_available"] = libreoffice_available
+
+    return jsonify(health_info)
 
 @app.route('/generate-certificate', methods=['POST'])
 def generate_certificate_api():
@@ -188,11 +289,17 @@ def internal_error(error):
 if __name__ == '__main__':
     # Check if template file exists
     if not os.path.exists("SpectoV_Cert.docx"):
-        print("Warning: Certificate template 'SpectoV_Cert.docx' not found in current directory")
-    
-    print("Starting Certificate Generation Service...")
-    print("Health check: http://localhost:5001/health")
-    print("Generate certificate: POST http://localhost:5001/generate-certificate")
-    
-    # Run Flask app on port 5001
-    app.run(host='https://sankalp-deploy-2.onrender.com', port=5001, debug=True)
+        logger.warning("Certificate template 'SpectoV_Cert.docx' not found in current directory")
+        logger.info(f"Current working directory: {os.getcwd()}")
+        logger.info(f"Files in current directory: {os.listdir('.')}")
+
+    logger.info("Starting Certificate Generation Service...")
+
+    # Get port from environment variable (for Render.com) or default to 5001
+    port = int(os.environ.get('PORT', 5001))
+
+    logger.info(f"Health check: http://localhost:{port}/health")
+    logger.info(f"Generate certificate: POST http://localhost:{port}/generate-certificate")
+
+    # Run Flask app - use 0.0.0.0 to bind to all interfaces
+    app.run(host='0.0.0.0', port=port, debug=False)

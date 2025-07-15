@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: certificate-service
+    env: python
+    buildCommand: chmod +x build.sh && ./build.sh
+    startCommand: cd backend && gunicorn --bind 0.0.0.0:$PORT --timeout 120 --workers 1 certificate_service:app
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.18
