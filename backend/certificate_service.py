@@ -12,6 +12,7 @@ app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
 def generate_certificate(name, domain, start_date, end_date, gender):
+    print("Name: ",name)
     """
     Generate a certificate with the provided details
     Returns the path to the generated PDF file
@@ -81,6 +82,8 @@ def generate_certificate(name, domain, start_date, end_date, gender):
         # Clean up the temporary DOCX file
         if os.path.exists(output_docx):
             os.remove(output_docx)
+
+        print("Returning PDF")
 
         return output_pdf
 
