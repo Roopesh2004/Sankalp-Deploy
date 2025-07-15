@@ -1964,11 +1964,11 @@ app.post('/api/generate-certificate', async (req, res) => {
       domain,
       start_date,
       end_date,
-      gender: gender || 'other'
+      gender: gender || 'other' 
     };
 
     // Call Flask certificate service
-    const FLASK_SERVICE_URL = process.env.FLASK_SERVICE_URL || 'http://localhost:5001';
+    const FLASK_SERVICE_URL = process.env.FLASK_SERVICE_URL || 'https://sankalp-deploy-2.onrender.com';
 
     const response = await fetch(`${FLASK_SERVICE_URL}/generate-certificate`, {
       method: 'POST',
