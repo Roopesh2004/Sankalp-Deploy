@@ -372,7 +372,7 @@ const About = () => {
               variants={textAnimation}
               custom={0.3}
             >
-              SpectoV Pvt Ltd is dedicated to establishing an atmosphere that encourages innovation, learning, and advancement. Our training programs are aimed at closing the gap between what is learned in school and what the industry needs.
+              SpectoV is dedicated to establishing an atmosphere that encourages innovation, learning, and advancement. Our training programs are aimed at closing the gap between what is learned in school and what the industry needs.
             </motion.p>
             
             <motion.p 
