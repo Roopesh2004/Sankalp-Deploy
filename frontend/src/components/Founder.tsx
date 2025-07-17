@@ -160,13 +160,13 @@ const Founder = () => {
                   />
                   <img
                     src="/imgf.jpg"
-                    alt="Vanshmani Jha"
+                    alt="Prakash Chand Jha"
                     className="h-14 w-14 rounded-full object-cover relative z-10 border-2 border-primary-500"
                   />
                   </motion.div>
                   <div>
                   <motion.p className="font-bold text-white" whileHover={{ color: "#a78bfa" }}>
-                    Vanshmani Jha
+                    Prakash Chand Jha
                   </motion.p>
                   <div className="flex items-center gap-1">
                     <p className="text-gray-400 text-sm">Founder & CEO, SpectoV</p>
