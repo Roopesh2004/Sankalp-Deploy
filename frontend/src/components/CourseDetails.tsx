@@ -146,16 +146,18 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({
   // Function to handle certificate download
   const handleCertificateDownload = async () => {
     try {
-      const response = await fetch("http://localhost:5001/api/generate", {
+      const certificateData = {
+        name: name || user?.name || 'Student',
+        domain: course.title,
+        start_date: 'May 1, 2025', // You can calculate this based on course start date
+        end_date: 'June 30, 2025', // You can calculate this based on course end date
+        gender: 'other' // Default gender, can be made configurable later
+      };
+
+      const response = await fetch("https://sankalp-deploy-1.onrender.com/api/generate-certificate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: "Yaswanth Panatala",
-          domain: "Web Development",
-          start_date: "May 1, 2025",
-          end_date: "June 30, 2025",
-          gender: "male",
-        }),
+        body: JSON.stringify(certificateData),
       });
 
       if (response.ok) {
@@ -163,16 +165,18 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "Certificate.pdf";
+        a.download = `${certificateData.name}_Certificate.pdf`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
       } else {
         console.error("Failed to download certificate");
+        alert("Failed to generate certificate. Please try again.");
       }
     } catch (error) {
-      console.error("Error calling Flask API:", error);
+      console.error("Error downloading certificate:", error);
+      alert("An error occurred while generating the certificate.");
     }
   };
 
@@ -323,6 +327,13 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({
           pendingData.value.maintenance_fee === 0
         ) {
           setRegistrationStatus("not_paid_maintenance");
+          setIsCheckingStatus(false);
+          return;
+        }else if(
+          pendingData.value.status === 1 &&
+          pendingData.value.maintenance_fee === 1
+        ){
+          setRegistrationStatus("approved");
           setIsCheckingStatus(false);
           return;
         }

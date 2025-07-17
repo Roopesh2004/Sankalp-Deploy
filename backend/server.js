@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const fetch = require('node-fetch');
 
 // Load environment variables
 dotenv.config();
@@ -356,11 +357,13 @@ app.post('/api/login', async (req, res) => {
       connection.release();
       
       if (pendingRecords.length > 0) {
+        console.log("Found")
         return res.json({
           message: 'Registration status found',
           value: pendingRecords[0]
         });
       } else {
+        console.log("Not Found")
         return res.json({
           message: 'No registration found',
           value: -1
@@ -1360,11 +1363,13 @@ app.post('/api/verify-certificate', async (req, res) => {
       connection.release();
 
       if (pendingRecords.length == 1) {
+        // console.log("Found")
         return res.json({
           message: 'Registration status found',
           value: pendingRecords[0].status
         });
       } else {
+        // console.log("Not found")
         return res.json({
           message: 'No registration found',
           value: -1
@@ -1508,6 +1513,80 @@ app.post('/api/verify-certificate', async (req, res) => {
 });
 
 
+
+// Certificate generation endpoint
+app.post('/api/generate-certificate', async (req, res) => {
+  try {
+    const { name, domain, start_date, end_date, gender } = req.body;
+
+    // Validate input
+    if (!name || !domain || !start_date || !end_date) {
+      return res.status(400).json({
+        message: 'Missing required fields: name, domain, start_date, end_date'
+      });
+    }
+
+    // Prepare data for Flask service
+    const certificateData = {
+      name,
+      domain,
+      start_date,
+      end_date,
+      gender: gender || 'other' 
+    };
+
+    console.log("Certificate Data: ",certificateData)
+
+    // Call Flask certificate service
+    const FLASK_SERVICE_URL = process.env.FLASK_SERVICE_URL || 'https://sankalp-deploy-2.onrender.com';
+
+    const response = await fetch(`${FLASK_SERVICE_URL}/generate-certificate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(certificateData)
+    });
+
+    if (!response.ok) {
+      console.log("Flask sent PDF")
+      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+      return res.status(response.status).json({
+        message: 'Failed to generate certificate',
+        error: errorData.error || 'Flask service error'
+      });
+    }
+
+    // Store certificate info in database
+    try {
+      const connection = await pool.getConnection();
+      const issued_date = new Date().toISOString().split('T')[0];
+
+      await connection.execute(
+        'INSERT INTO certificates (name, domain, status, issueDate) VALUES (?, ?, ?, ?)',
+        [name, domain, 1, issued_date]
+      );
+      connection.release();
+    } catch (dbError) {
+      console.error('Database error:', dbError);
+      // Continue with file sending even if database insert fails
+    }
+
+    // Forward the PDF response from Flask service
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${name}_Certificate.pdf"`);
+
+    // Pipe the response from Flask service to client
+    response.body.pipe(res);
+
+  } catch (error) {
+    console.error('Certificate generation error:', error);
+    res.status(500).json({
+      message: 'Certificate generation failed',
+      error: error.message
+    });
+  }
+});
 
 // Start server
 const PORT = process.env.PORT || 5000;
