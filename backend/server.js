@@ -7,6 +7,9 @@ const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const fetch = require('node-fetch');
+const { spawn } = require('child_process');
+const path = require('path');
+const fs = require('fs');
 
 // Load environment variables
 dotenv.config();
@@ -1526,21 +1529,21 @@ app.post('/api/generate-certificate', async (req, res) => {
       });
     }
 
-    // Prepare data for Flask service
+    // Prepare data for Python script
     const certificateData = {
       name,
       domain,
       start_date,
       end_date,
-      gender: gender || 'other' 
+      gender: gender || 'other'
     };
 
-    console.log("Certificate Data: ",certificateData)
+    console.log("Certificate Data: ", certificateData);
 
-    // Call Flask certificate service
-    const FLASK_SERVICE_URL = process.env.FLASK_SERVICE_URL || 'https://sankalp-deploy-2.onrender.com';
+    // Call Flask certificate service (app.py server)
+    const FLASK_SERVICE_URL = process.env.FLASK_SERVICE_URL || 'http://localhost:5002';
 
-    const response = await fetch(`${FLASK_SERVICE_URL}/generate-certificate`, {
+    const response = await fetch(`${FLASK_SERVICE_URL}/api/generate-certificate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1549,7 +1552,6 @@ app.post('/api/generate-certificate', async (req, res) => {
     });
 
     if (!response.ok) {
-      console.log("Flask sent PDF")
       const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
       return res.status(response.status).json({
         message: 'Failed to generate certificate',
@@ -1574,7 +1576,7 @@ app.post('/api/generate-certificate', async (req, res) => {
 
     // Forward the PDF response from Flask service
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="${name}_Certificate.pdf"`);
+    res.setHeader('Content-Disposition', `attachment; filename="${name.replace(/[^a-zA-Z0-9]/g, '_')}_Certificate.pdf"`);
 
     // Pipe the response from Flask service to client
     response.body.pipe(res);

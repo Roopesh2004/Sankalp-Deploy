@@ -1,11 +1,11 @@
 services:
   - type: web
-    name: certificate-service
-    env: python
-    buildCommand: chmod +x build.sh && ./build.sh
-    startCommand: cd backend && gunicorn --bind 0.0.0.0:$PORT --timeout 120 --workers 1 certificate_service:app
+    name: cert-generator
+    env: docker
     plan: free
-    healthCheckPath: /health
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.9.18
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    disk:
+      name: cert-data
+      mountPath: /app/static
+      sizeGB: 1

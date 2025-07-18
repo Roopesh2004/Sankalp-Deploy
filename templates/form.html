@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Certificate Generator</title>
+</head>
+<body>
+    <h2>Internship Certificate Generator</h2>
+    <form method="post">
+        <label>Full Name:</label><br>
+        <input type="text" name="name" required><br><br>
+
+        <label>Internship Domain:</label><br>
+        <input type="text" name="domain" required><br><br>
+
+        <label>Start Date:</label><br>
+        <input type="text" name="start_date" placeholder="e.g., May 1, 2025" required><br><br>
+
+        <label>End Date:</label><br>
+        <input type="text" name="end_date" placeholder="e.g., June 30, 2025" required><br><br>
+
+        <label>Gender:</label><br>
+        <select name="gender" required>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+        </select><br><br>
+
+        <input type="submit" value="Generate Certificate">
+    </form>
+</body>
+</html>
