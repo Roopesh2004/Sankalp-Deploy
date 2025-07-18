@@ -152,7 +152,7 @@ const Founder = () => {
                 Personalized guidance, hands-on training, and placement support is guaranteed. Join Sankalp today, and transform your tech career to achieve professional aspirations. 
               </motion.p>
               <motion.div className="flex items-center relative" variants={itemAnimation} whileHover={{ scale: 1.03 }}>
-                <motion.a target="_"  href="https://www.linkedin.com/in/founderspectov/" className="flex items-center" whileHover={{ scale: 1.02 }}>
+                <motion.a target="_"   className="flex items-center" whileHover={{ scale: 1.02 }}>
                   <motion.div className="relative mr-4">
                   <motion.div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full blur opacity-70"
                     animate={{ rotate: [0, 360], scale: [0.9, 1.1, 0.9] }}
@@ -252,5 +252,3 @@ const Founder = () => {
 };
 
 export default Founder;
-// This code defines a React component that displays a founder's message with a 3D animated background, tech icons, and a glowing effect. It uses Framer Motion for animations and Three.js for the 3D background.
-// The component includes a section with a background image, tech icons, and a message from the founder. It also features animated buttons and glowing elements to enhance the visual appeal.   
