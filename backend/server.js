@@ -131,6 +131,61 @@ app.post('/api/register', async (req, res) => {
 });
 
 // New endpoint to verify registration OTP
+// app.post('/api/verify-registration', async (req, res) => {
+//   try {
+//     const { email, otp, reg } = req.body;
+    
+//     if (!email || !otp) {
+//       return res.status(400).json({ message: 'Email and OTP are required' });
+//     }
+    
+//     // Check if OTP exists and is valid
+//     const otpData = registrationOtpStore.get(email);
+    
+//     if (!otpData) {
+//       return res.status(400).json({ message: 'No OTP found for this email' });
+//     }
+    
+//     if (Date.now() > otpData.expiry) {
+//       registrationOtpStore.delete(email);
+//       return res.status(400).json({ message: 'OTP has expired' });
+//     }
+    
+//     if (otpData.otp !== otp) {
+//       return res.status(400).json({ message: 'Invalid OTP' });
+//     }
+    
+//     // OTP is valid, proceed with registration
+//     const { name, email: userEmail, phone, password } = otpData.userData;
+    
+//     // Hash password
+//     const saltRounds = 10;
+//     const hashedPassword = await bcrypt.hash(password, saltRounds);
+    
+//     // Insert new user
+//     const connection = await pool.getConnection();
+//     const [result] = await connection.execute(
+//       `INSERT INTO ${reg}s (name, email, phone, password, referal) VALUES (?, ?, ?, ?, ?)`,
+//       [name, userEmail, phone, hashedPassword]
+//     );
+    
+//     connection.release();
+    
+//     // Clear the OTP
+//     registrationOtpStore.delete(email);
+    
+//     res.status(201).json({
+//       message: 'Registration successful',
+//       userId: result.insertId
+//     });
+    
+//   } catch (error) {
+//     console.error('Registration verification error:', error);
+//     res.status(500).json({ message: 'Registration verification failed', error: error.message });
+//   }
+// });
+
+
 app.post('/api/verify-registration', async (req, res) => {
   try {
     const { email, otp, reg } = req.body;
@@ -162,11 +217,50 @@ app.post('/api/verify-registration', async (req, res) => {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     
-    // Insert new user
+    // Generate unique referral ID
+    const generateReferralId = () => {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let result = '';
+      for (let i = 0; i < 8; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
+    };
+    
     const connection = await pool.getConnection();
+    
+    let referralId;
+    let isUnique = false;
+    let attempts = 0;
+    const maxAttempts = 100;
+    
+    // Generate unique referral ID
+    while (!isUnique && attempts < maxAttempts) {
+      referralId = generateReferralId();
+      
+      // Check if referral ID already exists
+      const [existingReferral] = await connection.execute(
+        `SELECT id FROM ${reg}s WHERE referal = ?`,
+        [referralId]
+      );
+      
+      if (existingReferral.length === 0) {
+        isUnique = true;
+      }
+      
+      attempts++;
+    }
+    
+    // If unable to generate unique ID after max attempts
+    if (!isUnique) {
+      connection.release();
+      return res.status(500).json({ message: 'Unable to generate unique referral ID. Please try again.' });
+    }
+    
+    // Insert new user with unique referral ID
     const [result] = await connection.execute(
-      `INSERT INTO ${reg}s (name, email, phone, password) VALUES (?, ?, ?, ?)`,
-      [name, userEmail, phone, hashedPassword]
+      `INSERT INTO ${reg}s (name, email, phone, password, referal) VALUES (?, ?, ?, ?, ?)`,
+      [name, userEmail, phone, hashedPassword, referralId]
     );
     
     connection.release();
@@ -176,7 +270,8 @@ app.post('/api/verify-registration', async (req, res) => {
     
     res.status(201).json({
       message: 'Registration successful',
-      userId: result.insertId
+      userId: result.insertId,
+      referralId: referralId
     });
     
   } catch (error) {
@@ -184,7 +279,6 @@ app.post('/api/verify-registration', async (req, res) => {
     res.status(500).json({ message: 'Registration verification failed', error: error.message });
   }
 });
-
 
 // Updated login endpoint with better debugging and error handling
 app.post('/api/login', async (req, res) => {
@@ -231,8 +325,12 @@ app.post('/api/login', async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        phone: user.phone
+        phone: user.phone,
+        referal:user.referal,
+        points:user.points
       };
+
+      // console.log(userResponse)
       
       res.json({
         message: 'Login successful',
@@ -438,6 +536,11 @@ app.post('/api/login', async (req, res) => {
       const [users] = await connection.execute(
         `SELECT id, name FROM ${table} WHERE email = ?`,
         [email]
+      );
+      console.log("Referal: ",pendingRecord)
+      const [increasereferal] = await connection.execute(
+        `UPDATE ${table} SET points = points + 10 WHERE referal = ?`,
+        [pendingRecord.referalid]
       );
       
       if (users.length === 0) {
@@ -1432,7 +1535,9 @@ app.post('/api/verify-certificate', async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        phone: user.phone
+        phone: user.phone,
+        referal: user.referal,
+        points: user.points
       };
       
       res.json({
@@ -1541,7 +1646,7 @@ app.post('/api/generate-certificate', async (req, res) => {
     console.log("Certificate Data: ", certificateData);
 
     // Call Flask certificate service (app.py server)
-    const FLASK_SERVICE_URL = process.env.FLASK_SERVICE_URL || 'http://localhost:5002';
+    const FLASK_SERVICE_URL = process.env.FLASK_SERVICE_URL || 'http://localhost:5001';
 
     const response = await fetch(`${FLASK_SERVICE_URL}/api/generate-certificate`, {
       method: 'POST',

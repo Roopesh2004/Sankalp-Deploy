@@ -16,11 +16,15 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({
   onClose,
   reg,
 }) => {
+
   const [formData, setFormData] = useState({
     name: user.name || "",
     email: user.email || "",
     phone: user.phone || "",
+    referal: user.referal || "",
+    points: user.points || ""
   });
+    // console.log(formData)
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -198,6 +202,42 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({
               onChange={(e) =>
                 setFormData({ ...formData, phone: e.target.value })
               }
+            />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <label
+              className="block text-gray-200 text-sm font-semibold mb-3"
+              htmlFor="phone"
+            >
+              Your referal ID
+            </label>
+            <input
+              className="w-full bg-gray-800/50 border border-gray-600/50 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 backdrop-blur-sm"
+              type="text"
+              readOnly
+              placeholder="Enter your phone number"
+              value={formData.referal}
+            />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <label
+              className="block text-gray-200 text-sm font-semibold mb-3"
+            >
+              Your points gained through Referal
+            </label>
+            <input
+              className="w-full bg-gray-800/50 border border-gray-600/50 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 backdrop-blur-sm"
+              readOnly
+              value={formData.points}
             />
           </motion.div>
 
