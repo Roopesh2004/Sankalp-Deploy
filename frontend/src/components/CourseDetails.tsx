@@ -165,7 +165,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${certificateData.name}_Certificate.pdf`;
+        a.download = `${certificateData.name}_Certificate.docx`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
