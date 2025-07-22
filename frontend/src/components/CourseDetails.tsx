@@ -275,7 +275,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({
 
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${registrationData.name}_Payment_Receipt.pdf`; // Filename
+    a.download = `Sankalp_Payment_Receipt.pdf`; // Filename
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
