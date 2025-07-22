@@ -154,7 +154,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({
         gender: 'other' // Default gender, can be made configurable later
       };
 
-      const response = await fetch("https://sankalp-deploy-1.onrender.com/api/generate-certificate", {
+      const response = await fetch("https://sankalp-deploy-1.onrender.com/generate-certificate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(certificateData),
