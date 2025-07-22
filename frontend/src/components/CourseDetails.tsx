@@ -79,6 +79,8 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({
   const [grantedDate, setGrantedDate] = useState<number>(0);
   const [finalWeekOpened, setFinalWeekOpened] = useState(false);
 
+  const [loading, setLoading]=useState(false);
+
   // New states for terms and conditions modal
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [pendingRegistrationData, setPendingRegistrationData] =
@@ -145,6 +147,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({
 
   // Function to handle certificate download
   const handleCertificateDownload = async () => {
+    setLoading(true);
     try {
       const certificateData = {
         name: name || user?.name || 'Student',
@@ -162,6 +165,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({
 
       if (response.ok) {
         const blob = await response.blob();
+        console.log("Downloaded blob type:", blob.type);
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -174,62 +178,127 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({
         console.error("Failed to download certificate");
         alert("Failed to generate certificate. Please try again.");
       }
+      setLoading(false);
     } catch (error) {
       console.error("Error downloading certificate:", error);
       alert("An error occurred while generating the certificate.");
     }
   };
 
+  // const submit_Maintenance = async (e?: React.FormEvent) => {
+  //   e?.preventDefault(); // Prevent default form submission
+
+  //   if (!transactionId.trim()) {
+  //     setErrorMessage("Transaction ID is required");
+  //     return;
+  //   }
+
+  //   setIsSubmitting(true);
+  //   setErrorMessage("");
+
+  //   const registrationData = {
+  //     name: name,
+  //     email: email,
+  //     transid: transactionId,
+  //     courseName: course.title,
+  //   };
+
+  //   try {
+  //     const response = await fetch(
+  //       "https://sankalp-deploy-1.onrender.com/api/maintenance",
+  //       {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/json" },
+  //         body: JSON.stringify({ registrationData, reg }),
+  //       }
+  //     );
+
+  //     const data = await response.json();
+
+  //     if (!response.ok) {
+  //       throw new Error(data.message || "Registration failed");
+  //     }
+
+  //     // Success - clear form and update status
+  //     setTransactionId("");
+  //     setErrorMessage("");
+  //     setRegistrationStatus("pending");
+  //     setPendingRegistrationData(null);
+  //   } catch (error) {
+  //     console.error("Registration error:", error);
+  //     setErrorMessage(
+  //       error instanceof Error
+  //         ? error.message
+  //         : "Failed to register for the course. Please try again."
+  //     );
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
   const submit_Maintenance = async (e?: React.FormEvent) => {
-    e?.preventDefault(); // Prevent default form submission
+  e?.preventDefault(); // Prevent default form submission
 
-    if (!transactionId.trim()) {
-      setErrorMessage("Transaction ID is required");
-      return;
-    }
+  if (!transactionId.trim()) {
+    setErrorMessage("Transaction ID is required");
+    return;
+  }
 
-    setIsSubmitting(true);
-    setErrorMessage("");
+  setIsSubmitting(true);
+  setErrorMessage("");
 
-    const registrationData = {
-      name: name,
-      email: email,
-      transid: transactionId,
-      courseName: course.title,
-    };
-
-    try {
-      const response = await fetch(
-        "https://sankalp-deploy-1.onrender.com/api/maintenance",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ registrationData, reg }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Registration failed");
-      }
-
-      // Success - clear form and update status
-      setTransactionId("");
-      setErrorMessage("");
-      setRegistrationStatus("pending");
-      setPendingRegistrationData(null);
-    } catch (error) {
-      console.error("Registration error:", error);
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Failed to register for the course. Please try again."
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
+  const registrationData = {
+    name: name,
+    email: email,
+    transid: transactionId,
+    courseName: course.title,
   };
+
+  try {
+    const response = await fetch(
+      "https://sankalp-deploy-1.onrender.com/api/maintenance",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ registrationData, reg }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Registration failed");
+    }
+
+    // --- Handle PDF download ---
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Sankalp_Payment_Receipt.pdf`; // Filename
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+    // Success - clear form and update status
+    setTransactionId("");
+    setErrorMessage("");
+    setRegistrationStatus("pending");
+    setPendingRegistrationData(null);
+
+  } catch (error) {
+    console.error("Registration error:", error);
+    setErrorMessage(
+      error instanceof Error
+        ? error.message
+        : "Failed to register for the course. Please try again."
+    );
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   const getVideoToken = async (moduleId: number) => {
     if (!email) return null;
@@ -600,7 +669,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({
                     className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition duration-200"
                   >
                     <Download className="w-4 h-4" />
-                    <span>Download Certificate</span>
+                    {loading? <span>Downloading !!</span> : <span>Download Certificate</span>}
                   </motion.button>
                 )}
               </div>
