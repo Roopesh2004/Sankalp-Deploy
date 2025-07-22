@@ -162,6 +162,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({
 
       if (response.ok) {
         const blob = await response.blob();
+        console.log("Downloaded blob type:", blob.type);
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;

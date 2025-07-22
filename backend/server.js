@@ -1685,7 +1685,7 @@ app.post('/api/generate-certificate', async (req, res) => {
     res.setHeader('Content-Disposition', `attachment; filename="${name.replace(/[^a-zA-Z0-9]/g, '_')}_Certificate.docx"`);
 
     // Pipe the response from Flask service to client
-    console.log(res)
+    // console.log(res)
     response.body.pipe(res);
 
   } catch (error) {
