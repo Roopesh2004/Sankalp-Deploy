@@ -2078,7 +2078,7 @@ app.post('/api/generate-certificate', async (req, res) => {
     console.log("Certificate Data: ", certificateData);
 
     // Call Flask certificate service (app.py server)
-    const FLASK_SERVICE_URL = process.env.FLASK_SERVICE_URL || 'http://localhost:5001';
+    const FLASK_SERVICE_URL = process.env.FLASK_SERVICE_URL || 'http://localhost:5002';
 
     const response = await fetch(`${FLASK_SERVICE_URL}/api/generate-certificate`, {
       method: 'POST',
