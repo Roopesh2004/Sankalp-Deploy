@@ -309,7 +309,7 @@ def health_check():
 
     return jsonify(health_info)
 
-@app.route('/generate-certificate', methods=['POST'])
+@app.route('/api/generate-certificate', methods=['POST'])
 def generate_certificate_api():
     """
     API endpoint to generate certificate

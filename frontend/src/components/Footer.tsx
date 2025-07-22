@@ -543,7 +543,7 @@ const Footer = () => {
               className="text-gray-500 text-sm mb-4 md:mb-0"
               whileHover={{ color: "#A78BFA" }}
             >
-              &copy; {new Date().getFullYear()} SpectoV Pvt Ltd. All rights reserved.
+              &copy; {new Date().getFullYear()} SpectoV All rights reserved.
             </motion.p>
             <motion.div 
               className="flex space-x-6"
