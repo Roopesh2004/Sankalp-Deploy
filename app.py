@@ -113,6 +113,7 @@ def generate_certificate_api():
         }
         doc.render(context)
         doc.save(output_docx)
+        print(output_docx)
 
         # Convert to PDF using LibreOffice
         # os.system(f'libreoffice --headless --convert-to pdf --outdir static {output_docx}')
