@@ -26,7 +26,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 10000
 
 # Start the app with Gunicorn
-CMD ["gunicorn", "-b", "0.0.0.0:10000", "app:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:10000","--timeout", "120", "app:app"]
 
 
 
