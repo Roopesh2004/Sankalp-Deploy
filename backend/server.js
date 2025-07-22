@@ -1657,6 +1657,7 @@ app.post('/api/generate-certificate', async (req, res) => {
     });
 
     if (!response.ok) {
+      console.log("Not Created")
       const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
       return res.status(response.status).json({
         message: 'Failed to generate certificate',
@@ -1665,23 +1666,23 @@ app.post('/api/generate-certificate', async (req, res) => {
     }
 
     // Store certificate info in database
-    try {
-      const connection = await pool.getConnection();
-      const issued_date = new Date().toISOString().split('T')[0];
+    // try {
+    //   const connection = await pool.getConnection();
+    //   const issued_date = new Date().toISOString().split('T')[0];
 
-      await connection.execute(
-        'INSERT INTO certificates (name, domain, status, issueDate) VALUES (?, ?, ?, ?)',
-        [name, domain, 1, issued_date]
-      );
-      connection.release();
-    } catch (dbError) {
-      console.error('Database error:', dbError);
-      // Continue with file sending even if database insert fails
-    }
+    //   await connection.execute(
+    //     'INSERT INTO certificates (name, domain, status, issueDate) VALUES (?, ?, ?, ?)',
+    //     [name, domain, 1, issued_date]
+    //   );
+    //   connection.release();
+    // } catch (dbError) {
+    //   console.error('Database error:', dbError);
+    //   // Continue with file sending even if database insert fails
+    // }
 
     // Forward the PDF response from Flask service
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="${name.replace(/[^a-zA-Z0-9]/g, '_')}_Certificate.pdf"`);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    res.setHeader('Content-Disposition', `attachment; filename="${name.replace(/[^a-zA-Z0-9]/g, '_')}_Certificate.docx"`);
 
     // Pipe the response from Flask service to client
     response.body.pipe(res);
