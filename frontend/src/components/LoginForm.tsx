@@ -129,8 +129,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               {getTypeLabel()} <span className="text-white">Login</span>
             </span>
           </h2>
+          
         </div>
-
+<p className='text-center text-justify bg-white text-black p-3 rounded-xl mb-5'>Try 2 to 3 times if signin/signup doesnot work once</p>
         {(formError === 'Invalid email or password' ||
           error === 'Invalid email or password') && (
           <div

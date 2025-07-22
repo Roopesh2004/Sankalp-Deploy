@@ -10,6 +10,7 @@ const fetch = require('node-fetch');
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const PDFDocument = require('pdfkit');
 
 // Load environment variables
 dotenv.config();
@@ -395,45 +396,99 @@ app.post('/api/login', async (req, res) => {
   });
 
 
-   app.post('/api/maintenance', async (req, res) => {
-    try {
-      const {registrationData , reg} = req.body;
+  //  app.post('/api/maintenance', async (req, res) => {
+  //   try {
+  //     const {registrationData , reg} = req.body;
 
-      const regData= registrationData;
-      console.log(regData)
+  //     const regData= registrationData;
+  //     console.log(regData)
       
-      // Validate input
-      if (!regData) {
-        return res.status(400).json({ message: 'All fields are required' });
-      }
+  //     // Validate input
+  //     if (!regData) {
+  //       return res.status(400).json({ message: 'All fields are required' });
+  //     }
       
-      // Get user from database
-      const connection = await pool.getConnection();
-
-      
+  //     // Get user from database
+  //     const connection = await pool.getConnection();
 
       
-      // Check if already in pending for this course
-      const [existingPending] = await connection.execute(
-        'UPDATE pending SET maintenance_fee = ?, maintenance_transaction = ? WHERE email = ? AND courseName = ? AND employee = ?',
-        [1,regData.transid,regData.email, regData.courseName,reg==='employee'?1:0]
-      );
+
       
-      if (existingPending.length) {
-        connection.release();
-        return res.status(409).json({});
-      }
+  //     // Check if already in pending for this course
+  //     const [existingPending] = await connection.execute(
+  //       'UPDATE pending SET maintenance_fee = ?, maintenance_transaction = ? WHERE email = ? AND courseName = ? AND employee = ?',
+  //       [1,regData.transid,regData.email, regData.courseName,reg==='employee'?1:0]
+  //     );
       
-      // console.log('Registration is under review');
+  //     if (existingPending.length) {
+  //       connection.release();
+  //       return res.status(409).json({});
+  //     }
       
-      res.json({});
+  //     // console.log('Registration is under review');
       
-    } catch (error) {
-      // console.error('Registration error:', error);
-      res.status(500).json();
+  //     res.json({});
+      
+  //   } catch (error) {
+  //     // console.error('Registration error:', error);
+  //     res.status(500).json();
+  //   }
+  // });
+
+
+  app.post('/api/maintenance', async (req, res) => {
+  try {
+    const { registrationData, reg } = req.body;
+    const regData = registrationData;
+    console.log(regData);
+
+    if (!regData) {
+      return res.status(400).json({ message: 'All fields are required' });
     }
-  });
 
+    const connection = await pool.getConnection();
+
+    const [result] = await connection.execute(
+      'UPDATE pending SET maintenance_fee = ?, maintenance_transaction = ? WHERE email = ? AND courseName = ? AND employee = ?',
+      [1, regData.transid, regData.email, regData.courseName, reg === 'employee' ? 1 : 0]
+    );
+
+    connection.release();
+
+    if (result.affectedRows === 0) {
+      return res.status(409).json({ message: 'No matching registration found' });
+    }
+
+    // ==== Create PDF ====
+    const doc = new PDFDocument();
+    let buffers = [];
+
+    doc.on('data', buffers.push.bind(buffers));
+    doc.on('end', () => {
+      const pdfData = Buffer.concat(buffers);
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename=Maintenance_Receipt_${regData.email}.pdf`);
+      res.send(pdfData);
+    });
+
+    // PDF Content
+    doc.fontSize(20).text('Maintenance Fee Payment Receipt', { align: 'center' });
+    doc.moveDown();
+    // doc.fontSize(14).text(`Name: ${user.name}`);
+    doc.text(`Email: ${regData.email}`);
+    doc.text(`Course Name: ${regData.courseName}`);
+    doc.text(`Transaction ID: ${regData.transid}`);
+    // doc.text(`Employee: ${reg === 'employee' ? 'Yes' : 'No'}`);
+    doc.moveDown();
+    doc.text('Status: ✅ Payment Successful', { color: 'green' });
+    doc.text(`Date: ${new Date().toLocaleString()}`);
+    doc.end();
+
+  } catch (error) {
+    console.error('Maintenance fee error:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
   
 
 
