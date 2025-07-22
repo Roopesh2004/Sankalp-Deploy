@@ -472,7 +472,7 @@ app.post('/api/login', async (req, res) => {
     });
 
     // PDF Content
-    doc.fontSize(20).text('Maintenance Fee Payment Receipt', { align: 'center' });
+    doc.fontSize(20).text('Fee Payment Receipt', { align: 'center' });
     doc.moveDown();
     // doc.fontSize(14).text(`Name: ${user.name}`);
     doc.text(`Email: ${regData.email}`);
