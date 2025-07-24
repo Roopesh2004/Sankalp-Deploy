@@ -12,6 +12,8 @@ export interface User {
   name: string;
   email: string;
   phone: string;
+  referal: string;
+  points: number;
   role: "admin" | "student" | "employee";
 }
 
@@ -94,6 +96,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         name: data.user.name,
         email: data.user.email,
         phone: data.user.phone,
+        referal: data.user.referal,
+        points: data.user.points,
         role: "student", // API users are always students
       };
 
@@ -195,6 +199,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         name: data.user.name,
         email: data.user.email,
         phone: data.user.phone,
+        referal: data.user.referal,
+        points: data.user.points,
         role: "employee", // API users are always students
       };
 

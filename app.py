@@ -113,27 +113,28 @@ def generate_certificate_api():
         }
         doc.render(context)
         doc.save(output_docx)
+        print(output_docx)
 
         # Convert to PDF using LibreOffice
-        os.system(f'libreoffice --headless --convert-to pdf --outdir static {output_docx}')
+        # os.system(f'libreoffice --headless --convert-to pdf --outdir static {output_docx}')
 
-        # Check if PDF was created successfully
-        if not os.path.exists(output_pdf):
-            return jsonify({
-                "success": False,
-                "error": "PDF conversion failed"
-            }), 500
+        # # Check if PDF was created successfully
+        # if not os.path.exists(output_pdf):
+        #     return jsonify({
+        #         "success": False,
+        #         "error": "PDF conversion failed"
+        #     }), 500
 
-        # Clean up the temporary DOCX file
-        if os.path.exists(output_docx):
-            os.remove(output_docx)
+        # # Clean up the temporary DOCX file
+        # if os.path.exists(output_docx):
+        #     os.remove(output_docx)
 
         # Return the PDF file
         return send_file(
-            output_pdf,
+            output_docx,
             as_attachment=True,
-            download_name=f"{name.replace(' ', '_')}_Certificate.pdf",
-            mimetype='application/pdf'
+            download_name=f"{name.replace(' ', '_')}_Certificate.docx",
+            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         )
 
     except Exception as e:

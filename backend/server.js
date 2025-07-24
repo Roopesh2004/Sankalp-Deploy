@@ -10,6 +10,7 @@ const fetch = require('node-fetch');
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const PDFDocument = require('pdfkit');
 
 // Load environment variables
 dotenv.config();
@@ -131,6 +132,61 @@ app.post('/api/register', async (req, res) => {
 });
 
 // New endpoint to verify registration OTP
+// app.post('/api/verify-registration', async (req, res) => {
+//   try {
+//     const { email, otp, reg } = req.body;
+    
+//     if (!email || !otp) {
+//       return res.status(400).json({ message: 'Email and OTP are required' });
+//     }
+    
+//     // Check if OTP exists and is valid
+//     const otpData = registrationOtpStore.get(email);
+    
+//     if (!otpData) {
+//       return res.status(400).json({ message: 'No OTP found for this email' });
+//     }
+    
+//     if (Date.now() > otpData.expiry) {
+//       registrationOtpStore.delete(email);
+//       return res.status(400).json({ message: 'OTP has expired' });
+//     }
+    
+//     if (otpData.otp !== otp) {
+//       return res.status(400).json({ message: 'Invalid OTP' });
+//     }
+    
+//     // OTP is valid, proceed with registration
+//     const { name, email: userEmail, phone, password } = otpData.userData;
+    
+//     // Hash password
+//     const saltRounds = 10;
+//     const hashedPassword = await bcrypt.hash(password, saltRounds);
+    
+//     // Insert new user
+//     const connection = await pool.getConnection();
+//     const [result] = await connection.execute(
+//       `INSERT INTO ${reg}s (name, email, phone, password, referal) VALUES (?, ?, ?, ?, ?)`,
+//       [name, userEmail, phone, hashedPassword]
+//     );
+    
+//     connection.release();
+    
+//     // Clear the OTP
+//     registrationOtpStore.delete(email);
+    
+//     res.status(201).json({
+//       message: 'Registration successful',
+//       userId: result.insertId
+//     });
+    
+//   } catch (error) {
+//     console.error('Registration verification error:', error);
+//     res.status(500).json({ message: 'Registration verification failed', error: error.message });
+//   }
+// });
+
+
 app.post('/api/verify-registration', async (req, res) => {
   try {
     const { email, otp, reg } = req.body;
@@ -162,11 +218,50 @@ app.post('/api/verify-registration', async (req, res) => {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     
-    // Insert new user
+    // Generate unique referral ID
+    const generateReferralId = () => {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let result = '';
+      for (let i = 0; i < 8; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
+    };
+    
     const connection = await pool.getConnection();
+    
+    let referralId;
+    let isUnique = false;
+    let attempts = 0;
+    const maxAttempts = 100;
+    
+    // Generate unique referral ID
+    while (!isUnique && attempts < maxAttempts) {
+      referralId = generateReferralId();
+      
+      // Check if referral ID already exists
+      const [existingReferral] = await connection.execute(
+        `SELECT id FROM ${reg}s WHERE referal = ?`,
+        [referralId]
+      );
+      
+      if (existingReferral.length === 0) {
+        isUnique = true;
+      }
+      
+      attempts++;
+    }
+    
+    // If unable to generate unique ID after max attempts
+    if (!isUnique) {
+      connection.release();
+      return res.status(500).json({ message: 'Unable to generate unique referral ID. Please try again.' });
+    }
+    
+    // Insert new user with unique referral ID
     const [result] = await connection.execute(
-      `INSERT INTO ${reg}s (name, email, phone, password) VALUES (?, ?, ?, ?)`,
-      [name, userEmail, phone, hashedPassword]
+      `INSERT INTO ${reg}s (name, email, phone, password, referal) VALUES (?, ?, ?, ?, ?)`,
+      [name, userEmail, phone, hashedPassword, referralId]
     );
     
     connection.release();
@@ -176,7 +271,8 @@ app.post('/api/verify-registration', async (req, res) => {
     
     res.status(201).json({
       message: 'Registration successful',
-      userId: result.insertId
+      userId: result.insertId,
+      referralId: referralId
     });
     
   } catch (error) {
@@ -184,7 +280,6 @@ app.post('/api/verify-registration', async (req, res) => {
     res.status(500).json({ message: 'Registration verification failed', error: error.message });
   }
 });
-
 
 // Updated login endpoint with better debugging and error handling
 app.post('/api/login', async (req, res) => {
@@ -231,8 +326,12 @@ app.post('/api/login', async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        phone: user.phone
+        phone: user.phone,
+        referal:user.referal,
+        points:user.points
       };
+
+      // console.log(userResponse)
       
       res.json({
         message: 'Login successful',
@@ -297,45 +396,99 @@ app.post('/api/login', async (req, res) => {
   });
 
 
-   app.post('/api/maintenance', async (req, res) => {
-    try {
-      const {registrationData , reg} = req.body;
+  //  app.post('/api/maintenance', async (req, res) => {
+  //   try {
+  //     const {registrationData , reg} = req.body;
 
-      const regData= registrationData;
-      console.log(regData)
+  //     const regData= registrationData;
+  //     console.log(regData)
       
-      // Validate input
-      if (!regData) {
-        return res.status(400).json({ message: 'All fields are required' });
-      }
+  //     // Validate input
+  //     if (!regData) {
+  //       return res.status(400).json({ message: 'All fields are required' });
+  //     }
       
-      // Get user from database
-      const connection = await pool.getConnection();
-
-      
+  //     // Get user from database
+  //     const connection = await pool.getConnection();
 
       
-      // Check if already in pending for this course
-      const [existingPending] = await connection.execute(
-        'UPDATE pending SET maintenance_fee = ?, maintenance_transaction = ? WHERE email = ? AND courseName = ? AND employee = ?',
-        [1,regData.transid,regData.email, regData.courseName,reg==='employee'?1:0]
-      );
+
       
-      if (existingPending.length) {
-        connection.release();
-        return res.status(409).json({});
-      }
+  //     // Check if already in pending for this course
+  //     const [existingPending] = await connection.execute(
+  //       'UPDATE pending SET maintenance_fee = ?, maintenance_transaction = ? WHERE email = ? AND courseName = ? AND employee = ?',
+  //       [1,regData.transid,regData.email, regData.courseName,reg==='employee'?1:0]
+  //     );
       
-      // console.log('Registration is under review');
+  //     if (existingPending.length) {
+  //       connection.release();
+  //       return res.status(409).json({});
+  //     }
       
-      res.json({});
+  //     // console.log('Registration is under review');
       
-    } catch (error) {
-      // console.error('Registration error:', error);
-      res.status(500).json();
+  //     res.json({});
+      
+  //   } catch (error) {
+  //     // console.error('Registration error:', error);
+  //     res.status(500).json();
+  //   }
+  // });
+
+
+  app.post('/api/maintenance', async (req, res) => {
+  try {
+    const { registrationData, reg } = req.body;
+    const regData = registrationData;
+    console.log(regData);
+
+    if (!regData) {
+      return res.status(400).json({ message: 'All fields are required' });
     }
-  });
 
+    const connection = await pool.getConnection();
+
+    const [result] = await connection.execute(
+      'UPDATE pending SET maintenance_fee = ?, maintenance_transaction = ? WHERE email = ? AND courseName = ? AND employee = ?',
+      [1, regData.transid, regData.email, regData.courseName, reg === 'employee' ? 1 : 0]
+    );
+
+    connection.release();
+
+    if (result.affectedRows === 0) {
+      return res.status(409).json({ message: 'No matching registration found' });
+    }
+
+    // ==== Create PDF ====
+    const doc = new PDFDocument();
+    let buffers = [];
+
+    doc.on('data', buffers.push.bind(buffers));
+    doc.on('end', () => {
+      const pdfData = Buffer.concat(buffers);
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename=Maintenance_Receipt_${regData.email}.pdf`);
+      res.send(pdfData);
+    });
+
+    // PDF Content
+    doc.fontSize(20).text('Fee Payment Receipt', { align: 'center' });
+    doc.moveDown();
+    // doc.fontSize(14).text(`Name: ${user.name}`);
+    doc.text(`Email: ${regData.email}`);
+    doc.text(`Course Name: ${regData.courseName}`);
+    doc.text(`Transaction ID: ${regData.transid}`);
+    // doc.text(`Employee: ${reg === 'employee' ? 'Yes' : 'No'}`);
+    doc.moveDown();
+    doc.text('Status: ✅ Payment Successful', { color: 'green' });
+    doc.text(`Date: ${new Date().toLocaleString()}`);
+    doc.end();
+
+  } catch (error) {
+    console.error('Maintenance fee error:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
   
 
 
@@ -438,6 +591,11 @@ app.post('/api/login', async (req, res) => {
       const [users] = await connection.execute(
         `SELECT id, name FROM ${table} WHERE email = ?`,
         [email]
+      );
+      console.log("Referal: ",pendingRecord)
+      const [increasereferal] = await connection.execute(
+        `UPDATE ${table} SET points = points + 10 WHERE referal = ?`,
+        [pendingRecord.referalid]
       );
       
       if (users.length === 0) {
@@ -1432,7 +1590,9 @@ app.post('/api/verify-certificate', async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        phone: user.phone
+        phone: user.phone,
+        referal: user.referal,
+        points: user.points
       };
       
       res.json({
@@ -1542,7 +1702,7 @@ app.post('/api/generate-certificate', async (req, res) => {
 
     // Call Flask certificate service (app.py server)
     const FLASK_SERVICE_URL = process.env.FLASK_SERVICE_URL || 'http://localhost:5002';
-
+    console.log(`Calling to: ${FLASK_SERVICE_URL}/api/generate-certificate`)
     const response = await fetch(`${FLASK_SERVICE_URL}/api/generate-certificate`, {
       method: 'POST',
       headers: {
@@ -1552,6 +1712,7 @@ app.post('/api/generate-certificate', async (req, res) => {
     });
 
     if (!response.ok) {
+      console.log("Not Created")
       const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
       return res.status(response.status).json({
         message: 'Failed to generate certificate',
@@ -1560,25 +1721,26 @@ app.post('/api/generate-certificate', async (req, res) => {
     }
 
     // Store certificate info in database
-    try {
-      const connection = await pool.getConnection();
-      const issued_date = new Date().toISOString().split('T')[0];
+    // try {
+    //   const connection = await pool.getConnection();
+    //   const issued_date = new Date().toISOString().split('T')[0];
 
-      await connection.execute(
-        'INSERT INTO certificates (name, domain, status, issueDate) VALUES (?, ?, ?, ?)',
-        [name, domain, 1, issued_date]
-      );
-      connection.release();
-    } catch (dbError) {
-      console.error('Database error:', dbError);
-      // Continue with file sending even if database insert fails
-    }
+    //   await connection.execute(
+    //     'INSERT INTO certificates (name, domain, status, issueDate) VALUES (?, ?, ?, ?)',
+    //     [name, domain, 1, issued_date]
+    //   );
+    //   connection.release();
+    // } catch (dbError) {
+    //   console.error('Database error:', dbError);
+    //   // Continue with file sending even if database insert fails
+    // }
 
     // Forward the PDF response from Flask service
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="${name.replace(/[^a-zA-Z0-9]/g, '_')}_Certificate.pdf"`);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    res.setHeader('Content-Disposition', `attachment; filename="${name.replace(/[^a-zA-Z0-9]/g, '_')}_Certificate.docx"`);
 
     // Pipe the response from Flask service to client
+    // console.log(res)
     response.body.pipe(res);
 
   } catch (error) {
