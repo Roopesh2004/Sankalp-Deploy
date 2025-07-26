@@ -731,7 +731,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ reg }) => {
                       }}
                       transition={{ duration: 5, repeat: Infinity }}
                     >
-                      Available Courses
+                      Program Catalogues
                     </motion.h2>
                     <motion.p
                       initial={{ opacity: 0, y: 20 }}
