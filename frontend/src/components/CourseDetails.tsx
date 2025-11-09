@@ -946,7 +946,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({
               <div className="flex-1 flex justify-center items-center">
                 <div className="bg-white p-4 rounded-lg">
                   <img
-                    src="/qr_scan.jpg"
+                    src="/new_QR.jpg"
                     alt="QR Code"
                     className="w-[150px] h-[150px] object-contain"
                   />
@@ -1032,7 +1032,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({
               <div className="flex-1 flex justify-center items-center">
                 <div className="bg-white p-4 rounded-lg">
                   <img
-                    src="/qr_scan.jpg"
+                    src="/new_QR.jpg"
                     alt="QR Code"
                     className="w-[150px] h-[150px] object-contain"
                   />
